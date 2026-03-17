@@ -59,6 +59,8 @@ import com.bytedance.scene.group.ReuseGroupScene;
 import com.bytedance.scene.interfaces.ActivityCompatibleBehavior;
 import com.bytedance.scene.interfaces.ActivityResultCallback;
 import com.bytedance.scene.interfaces.ChildSceneLifecycleCallbacks;
+import com.bytedance.scene.interfaces.CoordinateScheduleScene;
+import com.bytedance.scene.interfaces.CoordinateScheduleSceneKt;
 import com.bytedance.scene.interfaces.PermissionResultCallback;
 import com.bytedance.scene.interfaces.PopOptions;
 import com.bytedance.scene.interfaces.PushOptions;
@@ -606,7 +608,11 @@ public final class NavigationScene extends Scene implements NavigationListener, 
         }
 
         if (pushOptions == null) {
-            pushOptions = new PushOptions.Builder().build();
+            if (scene instanceof CoordinateScheduleScene) {
+                pushOptions = CoordinateScheduleSceneKt.createDefaultCoordinatePushOptions();
+            } else {
+                pushOptions = new PushOptions.Builder().build();
+            }
         }
 
         hideSoftInputIfNeeded();

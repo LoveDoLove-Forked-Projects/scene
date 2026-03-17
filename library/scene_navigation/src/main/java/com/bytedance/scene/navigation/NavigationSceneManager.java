@@ -45,13 +45,16 @@ import com.bytedance.scene.animation.AnimationInfo;
 import com.bytedance.scene.animation.NavigationAnimationExecutor;
 import com.bytedance.scene.animation.interaction.InteractionNavigationPopAnimationFactory;
 import com.bytedance.scene.exceptions.PreviousExceptionMistakenlyForceCaughtException;
+import com.bytedance.scene.interfaces.CoordinateScheduleSceneKt;
 import com.bytedance.scene.interfaces.Function;
 import com.bytedance.scene.interfaces.ActivityCompatibleBehavior;
+import com.bytedance.scene.interfaces.CoordinateScheduleScene;
 import com.bytedance.scene.interfaces.PopOptions;
 import com.bytedance.scene.interfaces.PushOptions;
 import com.bytedance.scene.interfaces.SceneMemoryRecyclePolicy;
 import com.bytedance.scene.launchmode.LaunchModeBehavior;
 import com.bytedance.scene.logger.LoggerManager;
+import com.bytedance.scene.navigation.pop.CoordinatePopCountOperation;
 import com.bytedance.scene.navigation.pop.CoordinatePopOptionOperation;
 import com.bytedance.scene.navigation.push.CoordinatePushOptionOperation;
 import com.bytedance.scene.parcel.ParcelConstants;
@@ -773,6 +776,12 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
             final Record currentRecord = mBackStackList.getCurrentRecord();
             final Scene currentScene = currentRecord.mScene;
             final View currentSceneView = currentScene.getView();
+
+            if (currentScene instanceof CoordinateScheduleScene) {
+                PopOptions popOptions = CoordinateScheduleSceneKt.createDefaultCoordinatePopOptions();
+                new CoordinatePopCountOperation(NavigationSceneManager.this, requireMessageQueue(), animationFactory, this.popCount, popOptions).execute(operationEndAction);
+                return;
+            }
 
             /*
              * The practice here should be to remove those Scenes in the middle,
