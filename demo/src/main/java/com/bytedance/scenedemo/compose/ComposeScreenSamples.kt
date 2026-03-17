@@ -13,6 +13,7 @@ import com.bytedance.scenedemo.utility.addButton
 import com.bytedance.scenedemo.utility.addClassPathTitle
 import com.bytedance.scenedemo.utility.addSpace
 import com.bytedance.scenedemo.utility.addTitle
+import com.bytedance.scene.navigation.compose.pushCompose
 
 class ComposeScreenSamples : UserVisibleHintGroupScene() {
     override fun onCreateView(

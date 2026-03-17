@@ -1,4 +1,4 @@
-package com.bytedance.scenedemo.compose
+package com.bytedance.scene.navigation.compose
 
 import android.os.Bundle
 import android.view.LayoutInflater

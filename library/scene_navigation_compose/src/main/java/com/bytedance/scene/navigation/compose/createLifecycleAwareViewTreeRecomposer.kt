@@ -1,4 +1,4 @@
-package com.bytedance.scenedemo.compose
+package com.bytedance.scene.navigation.compose
 
 import android.view.View
 import androidx.compose.runtime.MonotonicFrameClock

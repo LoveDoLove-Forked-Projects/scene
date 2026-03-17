@@ -1,0 +1,75 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.miniSdkVersion
+    }
+    resourcePrefix 'scene_'
+
+    buildFeatures {
+        // Enables Jetpack Compose for this module
+        compose true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.4.0-alpha02'
+    }
+}
+
+dependencies {
+    api project(path: ':library:scene')
+    api project(path: ':library:scene_navigation')
+    api project(path: ':library:scene_ktx')
+
+    implementation APPCOMPAT_LIB //unit test required
+    implementation ANNOTATION_LIB
+    implementation LIFECYCLE_VIEWMODEL_LIB
+    implementation LIFECYCLE_EXTENSIONS_LIB
+    implementation KOTLIN_LIB
+    implementation COMPOSE_RUNTIME
+    implementation COMPOSE_UI
+
+    testImplementation project(':library:scene_navigation_compose')
+    testImplementation ROBOLECTRIC
+    testImplementation JUNIT
+    testAnnotationProcessor AUTO_SERVICE
+}
+
+tasks.withType(Test) {
+    testLogging {
+        events "failed"
+    }
+
+    afterSuite { desc, result ->
+        if (!desc.parent)
+            println("${result.resultType} " +
+                    "(${result.testCount} tests, " +
+                    "${result.successfulTestCount} successes, " +
+                    "${result.failedTestCount} failures, " +
+                    "${result.skippedTestCount} skipped)")
+    }
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    destinationDir = file("../javadoc/scene_navigation_compose/")
+    failOnError false
+    title = null
+
+    options {
+        doclet = "com.google.doclava.Doclava"
+        docletpath(new File(project.rootDir, "tools/doclava-1.0.6.jar"))
+        locale "en_US"
+        encoding "UTF-8"
+    }
+}

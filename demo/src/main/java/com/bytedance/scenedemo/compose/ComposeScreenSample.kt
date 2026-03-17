@@ -10,6 +10,10 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.accompanist.appcompattheme.AppCompatTheme
+import com.bytedance.scene.navigation.compose.SceneComposeScreen
+import com.bytedance.scene.navigation.compose.LocalScreenArguments
+import com.bytedance.scene.navigation.compose.LocalNavigationScene
+import com.bytedance.scene.navigation.compose.pushCompose
 
 class ComposeScreenSample : SceneComposeScreen() {
     @Composable
