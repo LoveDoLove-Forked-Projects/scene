@@ -8,6 +8,7 @@ import android.view.WindowManager
 import com.bytedance.scene.Scene
 import com.bytedance.scene.ui.template.NavigationViewScene
 import com.bytedance.scenedemo.benchmark.BenchmarkSamples
+import com.bytedance.scenedemo.compose.ComposeScreenSamples
 import com.bytedance.scenedemo.other_library.OtherLibrarySamples
 import com.bytedance.scenedemo.router.RouterSample
 
@@ -29,7 +30,7 @@ class MainScene : NavigationViewScene() {
         map[R.id.activity_compatibility] = ActivityCompatibilitySamples()
         map[R.id.other_library] = OtherLibrarySamples()
         map[R.id.migrate] = MigrateSamples()
-        map[R.id.compose] = ComposeSamples()
+        map[R.id.compose] = ComposeScreenSamples()
         map[R.id.benchmark] = BenchmarkSamples()
         map[R.id.extreme_case] = CaseListDemo()
         return map

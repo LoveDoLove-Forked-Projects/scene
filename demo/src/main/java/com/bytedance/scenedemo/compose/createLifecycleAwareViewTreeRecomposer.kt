@@ -1,4 +1,4 @@
-package com.bytedance.scenedemo
+package com.bytedance.scenedemo.compose
 
 import android.view.View
 import androidx.compose.runtime.MonotonicFrameClock
@@ -14,7 +14,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
 import kotlin.coroutines.EmptyCoroutineContext
 
-fun Scene.createLifecycleAwareViewTreeRecomposer(): Recomposer {
+fun Scene.createLifecycleAwareViewTreeRecomposer(view: View): Recomposer {
     val currentThreadContext = AndroidUiDispatcher.CurrentThread
     val pausableClock = currentThreadContext[MonotonicFrameClock]?.let {
         PausableMonotonicFrameClock(it).apply { pause() }
@@ -27,10 +27,10 @@ fun Scene.createLifecycleAwareViewTreeRecomposer(): Recomposer {
     // Since this factory function is used to create a new recomposer for each invocation and
     // doesn't reuse a single instance like other factories might, shut it down whenever it
     // becomes detached. This can easily happen as part of setting a new content view.
-    this.view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+    view.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {}
         override fun onViewDetachedFromWindow(v: View) {
-            this@createLifecycleAwareViewTreeRecomposer.view.removeOnAttachStateChangeListener(
+            view.removeOnAttachStateChangeListener(
                 this
             )
             recomposer.cancel()
