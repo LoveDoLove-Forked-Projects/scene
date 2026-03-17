@@ -37,11 +37,9 @@ public class PopPauseOperation implements Operation {
          */
         if (mCurrentScene != null) {
             Bundle previousSavedState = null;
-            if (SceneGlobalConfig.usePreviousSavedStateWhenPauseIfPossible) {
-                previousSavedState = this.mCurrentRecord.consumeSavedInstanceState();
-                if (previousSavedState != null && this.mCurrentScene.getState() != State.NONE) {
-                    throw new SceneInternalException("Scene' previous saved state still exists when its state is " + this.mCurrentScene.getState().name);
-                }
+            previousSavedState = this.mCurrentRecord.consumeSavedInstanceState();
+            if (previousSavedState != null && this.mCurrentScene.getState() != State.NONE) {
+                throw new SceneInternalException("Scene' previous saved state still exists when its state is " + this.mCurrentScene.getState().name);
             }
             this.mManagerAbility.moveState(this.mNavigationScene, this.mCurrentScene, State.STARTED, previousSavedState, false, null);
         }
