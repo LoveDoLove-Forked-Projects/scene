@@ -1899,7 +1899,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
         Scene scene = getCurrentScene();
         if (ActivityCompatibleInfoCollector.isTargetSceneType(scene)) {
             //When Scene is totally invisible or not created, for example be recycled ant not restore yet, we should skip to dispatch event
-            if (SceneGlobalConfig.shouldSkipDispatchWindowFocusChangeToNotReadyScene && scene.getState().value <= State.ACTIVITY_CREATED.value) {
+            if (scene.getState().value <= State.ACTIVITY_CREATED.value) {
                 LoggerManager.getInstance().i(TAG, "Target Scene " + scene.toString() + "[" + scene.getState().name + "] is not ready, skip dispatch WindowFocus change event");
                 return;
             }
