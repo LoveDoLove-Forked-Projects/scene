@@ -4,14 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
 import com.bytedance.scene.Scene
 import com.bytedance.scene.group.GroupScene
 import com.bytedance.scene.interfaces.PushOptions
 import com.bytedance.scene.ktx.requireNavigationScene
 import com.bytedance.scenedemo.R
 import com.bytedance.scenedemo.utility.ColorUtil
-import java.util.*
 
 /**
  * Created by JiangQi on 8/15/18.
@@ -24,14 +27,14 @@ class AnimationResDemoScene : GroupScene() {
         layout.fitsSystemWindows = true
         layout.orientation = LinearLayout.VERTICAL
 
-        val enterAnimationRes = intArrayOf(R.anim.slide_in_from_right, R.anim.abc_fade_in, android.R.anim.fade_in, android.R.anim.slide_in_left)
+        val enterAnimationRes = intArrayOf(R.anim.slide_in_from_right, androidx.appcompat.R.anim.abc_fade_in, android.R.anim.fade_in, android.R.anim.slide_in_left)
 
         val enterAnimationResStr = ArrayList<String>()
         for (resId in enterAnimationRes) {
             enterAnimationResStr.add(requireActivity().resources.getResourceEntryName(resId))
         }
 
-        val exitAnimationRes = intArrayOf(R.anim.slide_out_to_left, R.anim.abc_fade_out, android.R.anim.fade_out, android.R.anim.slide_out_right)
+        val exitAnimationRes = intArrayOf(R.anim.slide_out_to_left, androidx.appcompat.R.anim.abc_fade_out, android.R.anim.fade_out, android.R.anim.slide_out_right)
 
         val exitAnimationResStr = ArrayList<String>()
         for (resId in exitAnimationRes) {

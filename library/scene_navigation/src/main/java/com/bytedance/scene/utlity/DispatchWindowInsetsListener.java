@@ -25,7 +25,7 @@ import android.view.WindowInsets;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.RestrictTo;
 
-import com.bytedance.scene.navigation.R;
+import com.bytedance.scene.R;
 
 /**
  * Created by JiangQi on 8/24/18.

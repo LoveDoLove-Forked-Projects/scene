@@ -3,6 +3,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'kotlin-android'
 
 android {
+    namespace "com.bytedance.scene.navigation"
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {

@@ -51,7 +51,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.widget.NestedScrollView;
-import com.bytedance.scene.dialog.R;
+import androidx.appcompat.R;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 

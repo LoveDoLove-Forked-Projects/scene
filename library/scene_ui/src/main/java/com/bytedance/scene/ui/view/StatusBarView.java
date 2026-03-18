@@ -27,7 +27,7 @@ import android.util.TypedValue;
 import android.view.View;
 
 import androidx.annotation.DrawableRes;
-import com.bytedance.scene.ui.R;
+import androidx.appcompat.R;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;

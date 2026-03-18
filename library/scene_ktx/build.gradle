@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'maven-publish'
 
 android {
+    namespace "com.bytedance.scene.ktx"
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {

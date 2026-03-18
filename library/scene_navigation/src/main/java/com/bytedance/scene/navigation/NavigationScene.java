@@ -46,6 +46,7 @@ import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.bytedance.scene.ActivityCompatibilityUtility;
+import com.bytedance.scene.R;
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.SceneComponentFactory;
 import com.bytedance.scene.SceneGlobalConfig;
