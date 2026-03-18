@@ -30,7 +30,7 @@ import com.bytedance.scene.navigation.NavigationScene
 class ComposeInnerScene : Scene(), CoordinateScheduleScene {
     private val SCENE_COMPOSE_SCREEN_CLASS_NAME = "bd-scene-nav:scene_compose_name"
     private val SCENE_COMPOSE_SCREEN_ARGUMENTS = "bd-scene-nav:scene_compose_name_arguments"
-    internal var sceneComposeScreen: SceneComposeScreen? = null
+    internal var composeScreen: ComposeScreen? = null
     private var composeView: ComposeView? = null
     override fun onCreateView(p0: LayoutInflater, p1: ViewGroup, p2: Bundle?): View {
         return ComposeView(requireSceneContext()).apply {
@@ -41,16 +41,16 @@ class ComposeInnerScene : Scene(), CoordinateScheduleScene {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        if (this.sceneComposeScreen == null && savedInstanceState != null) {
+        if (this.composeScreen == null && savedInstanceState != null) {
             val targetCompose = Class.forName(
                 requireNotNull(
                     savedInstanceState.getString(
                         SCENE_COMPOSE_SCREEN_CLASS_NAME
                     )
                 )
-            ).newInstance() as SceneComposeScreen
+            ).newInstance() as ComposeScreen
             targetCompose.setArguments(savedInstanceState.getBundle(SCENE_COMPOSE_SCREEN_ARGUMENTS))
-            this.sceneComposeScreen = targetCompose
+            this.composeScreen = targetCompose
         }
 
         val navigationScene = requireParentScene() as NavigationScene
@@ -58,10 +58,10 @@ class ComposeInnerScene : Scene(), CoordinateScheduleScene {
         composeView?.setContent {
             CompositionLocalProvider(
                 LocalNavigationScene provides navigationScene,
-                LocalScreenArguments provides this.sceneComposeScreen?.arguments,
+                LocalScreenArguments provides this.composeScreen?.arguments,
                 LocalResultReceiver provides ComposeResultReceiver(navigationScene, this)
             ) {
-                this.sceneComposeScreen?.Content()
+                this.composeScreen?.Content()
             }
         }
     }
@@ -69,10 +69,10 @@ class ComposeInnerScene : Scene(), CoordinateScheduleScene {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putString(
-            SCENE_COMPOSE_SCREEN_CLASS_NAME, requireNotNull(this.sceneComposeScreen).javaClass.name
+            SCENE_COMPOSE_SCREEN_CLASS_NAME, requireNotNull(this.composeScreen).javaClass.name
         )
         outState.putBundle(
-            SCENE_COMPOSE_SCREEN_ARGUMENTS, requireNotNull(this.sceneComposeScreen).arguments
+            SCENE_COMPOSE_SCREEN_ARGUMENTS, requireNotNull(this.composeScreen).arguments
         )
     }
 }

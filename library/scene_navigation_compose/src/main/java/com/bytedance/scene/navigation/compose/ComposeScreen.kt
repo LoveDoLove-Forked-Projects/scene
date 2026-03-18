@@ -30,7 +30,7 @@ private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")
 }
 
-abstract class SceneComposeScreen() {
+abstract class ComposeScreen() {
     internal var arguments: Bundle? = null
 
     @Composable

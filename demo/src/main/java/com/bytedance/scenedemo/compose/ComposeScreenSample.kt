@@ -9,14 +9,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LifecycleEventObserver
+import com.bytedance.scene.navigation.compose.ComposeScreen
 import com.bytedance.scene.navigation.compose.LocalNavigationScene
 import com.bytedance.scene.navigation.compose.LocalResultReceiver
 import com.bytedance.scene.navigation.compose.LocalScreenArguments
-import com.bytedance.scene.navigation.compose.SceneComposeScreen
 import com.bytedance.scene.navigation.compose.pushCompose
 import com.google.accompanist.appcompattheme.AppCompatTheme
 
-class ComposeScreenSample : SceneComposeScreen() {
+class ComposeScreenSample : ComposeScreen() {
     @Composable
     override fun Content() {
         val arguments = LocalScreenArguments.current

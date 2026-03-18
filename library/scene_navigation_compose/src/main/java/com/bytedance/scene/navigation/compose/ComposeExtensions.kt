@@ -18,8 +18,8 @@ package com.bytedance.scene.navigation.compose
 import com.bytedance.scene.navigation.NavigationScene
 
 //TODO support other PushOptions abilities, like popTo
-fun NavigationScene.pushCompose(screen: SceneComposeScreen) {
+fun NavigationScene.pushCompose(screen: ComposeScreen) {
     val scene = ComposeInnerScene()
-    scene.sceneComposeScreen = screen
+    scene.composeScreen = screen
     this.push(scene, null)
 }
