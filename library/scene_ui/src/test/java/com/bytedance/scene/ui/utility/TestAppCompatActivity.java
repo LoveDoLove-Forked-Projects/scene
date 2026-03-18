@@ -4,7 +4,7 @@ import android.os.Bundle;
  import android.widget.FrameLayout;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import com.bytedance.scene.ui.R;
+import androidx.appcompat.R;
 import com.bytedance.scene.utlity.ViewIdGenerator;
 
 public class TestAppCompatActivity extends AppCompatActivity {
