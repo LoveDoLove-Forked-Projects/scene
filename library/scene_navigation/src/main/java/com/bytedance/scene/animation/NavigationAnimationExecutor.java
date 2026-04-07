@@ -15,6 +15,8 @@
  */
 package com.bytedance.scene.animation;
 
+import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
+
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,9 +30,13 @@ import com.bytedance.scene.utlity.CancellationSignal;
 import com.bytedance.scene.utlity.CancellationSignalList;
 import com.bytedance.scene.utlity.Utility;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 
 /**
  * Created by JiangQi on 7/30/18.
@@ -38,14 +44,41 @@ import androidx.annotation.NonNull;
 public abstract class NavigationAnimationExecutor {
     protected ViewGroup mAnimationViewGroup;
     protected Runnable mCustomAnimationEndAction;
+    protected List<NavigationAnimationEndAction> mCustomAnimationEndActionList = null;
     protected boolean mDisableRemoveView;
 
     public void setAnimationViewGroup(@NonNull ViewGroup viewGroup) {
         this.mAnimationViewGroup = viewGroup;
     }
 
+    /**
+     * use addAnimationEndAction/removeAnimationEndAction instead
+     */
+    @Deprecated
     public void setAnimationEndAction(Runnable endAction){
         mCustomAnimationEndAction = endAction;
+    }
+
+    public void addAnimationEndAction(@NonNull NavigationAnimationEndAction endAction) {
+        if (this.mCustomAnimationEndActionList == null) {
+            this.mCustomAnimationEndActionList = new ArrayList<>();
+        }
+        this.mCustomAnimationEndActionList.add(endAction);
+    }
+
+    public void removeAnimationEndAction(@NonNull NavigationAnimationEndAction endAction) {
+        List<NavigationAnimationEndAction> endActionList = this.mCustomAnimationEndActionList;
+        if (endActionList != null) {
+            endActionList.remove(endAction);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @RestrictTo(LIBRARY_GROUP)
+    public void replaceAnimationEndActionList(@Nullable List<NavigationAnimationEndAction> endActionList) {
+        this.mCustomAnimationEndActionList = endActionList;
     }
 
     public void setDisableRemoveView(boolean disableRemoveView) { mDisableRemoveView = disableRemoveView; }
@@ -92,6 +125,14 @@ public abstract class NavigationAnimationExecutor {
                 endAction.run();
                 if (mCustomAnimationEndAction != null) {
                     mCustomAnimationEndAction.run();
+                }
+
+                List<NavigationAnimationEndAction> endActionList = mCustomAnimationEndActionList;
+                if (endActionList != null) {
+                    List<NavigationAnimationEndAction> tmp = new ArrayList<>(endActionList);
+                    for (NavigationAnimationEndAction runnable : tmp) {
+                        runnable.onPushEnd();
+                    }
                 }
             }
         };
@@ -161,6 +202,14 @@ public abstract class NavigationAnimationExecutor {
                 endAction.run();
                 if (mCustomAnimationEndAction != null) {
                     mCustomAnimationEndAction.run();
+                }
+
+                List<NavigationAnimationEndAction> endActionList = mCustomAnimationEndActionList;
+                if (endActionList != null) {
+                    List<NavigationAnimationEndAction> tmp = new ArrayList<>(endActionList);
+                    for (NavigationAnimationEndAction runnable : tmp) {
+                        runnable.onPopEnd();
+                    }
                 }
             }
         };

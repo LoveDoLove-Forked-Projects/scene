@@ -3,6 +3,7 @@ package com.bytedance.scene.animation.animatorexecutor
 import android.view.ViewGroup
 import com.bytedance.scene.Scene
 import com.bytedance.scene.animation.AnimationInfo
+import com.bytedance.scene.animation.NavigationAnimationEndAction
 import com.bytedance.scene.animation.NavigationAnimationExecutor
 import com.bytedance.scene.logger.LoggerManager
 import com.bytedance.scene.utlity.CancellationSignal
@@ -32,6 +33,7 @@ class MutableAnimationExecutor(
             value.setDisableRemoveView(this.mDisableRemoveView)
             value.setAnimationEndAction(this.mCustomAnimationEndAction)
             value.setAnimationViewGroup(this.mAnimationViewGroup)
+            value.replaceAnimationEndActionList(this.mCustomAnimationEndActionList)
             this._delegated = value
         }
 
@@ -41,6 +43,7 @@ class MutableAnimationExecutor(
         _delegated.setDisableRemoveView(disableRemoveView)
     }
 
+    @Deprecated("use addAnimationEndAction/removeAnimationEndAction instead")
     override fun setAnimationEndAction(endAction: Runnable?) {
         super.setAnimationEndAction(endAction)
         LoggerManager.getInstance().i(TAG, "setAnimationEndAction $_delegated")
@@ -51,6 +54,16 @@ class MutableAnimationExecutor(
         super.setAnimationViewGroup(viewGroup)
         LoggerManager.getInstance().i(TAG, "setAnimationViewGroup $_delegated")
         _delegated.setAnimationViewGroup(viewGroup)
+    }
+
+    override fun addAnimationEndAction(endAction: NavigationAnimationEndAction) {
+        super.addAnimationEndAction(endAction)
+        _delegated.addAnimationEndAction(endAction)
+    }
+
+    override fun removeAnimationEndAction(endAction: NavigationAnimationEndAction) {
+        super.removeAnimationEndAction(endAction)
+        _delegated.removeAnimationEndAction(endAction)
     }
 
     override fun executePopChangeCancelable(
