@@ -23,4 +23,10 @@ import java.lang.ref.WeakReference
  */
 abstract class CallerAwarePushResultCallback(_callerScene: Scene) : PushResultCallback {
     internal val callerSceneRef: WeakReference<Scene> = WeakReference(_callerScene)
+
+    /**
+     * Caller Scene is unavailable, it has already been popped from NavigationScene
+     */
+    fun onCallerSceneUnavailable(callerScene: Scene) {
+    }
 }

@@ -15,7 +15,6 @@
  */
 package com.bytedance.scene.interfaces;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bytedance.scene.Scene;
@@ -25,11 +24,4 @@ import com.bytedance.scene.Scene;
  */
 public interface PushResultCallback {
     void onResult(@Nullable Object result);
-
-    /**
-     * Caller Scene is unavailable, it has already been popped from NavigationScene
-     */
-    default void onCallerSceneUnavailable(@NonNull Scene callerScene) {
-
-    }
 }
