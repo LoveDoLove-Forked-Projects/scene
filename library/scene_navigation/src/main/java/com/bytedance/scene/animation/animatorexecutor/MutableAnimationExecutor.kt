@@ -3,8 +3,8 @@ package com.bytedance.scene.animation.animatorexecutor
 import android.view.ViewGroup
 import com.bytedance.scene.Scene
 import com.bytedance.scene.animation.AnimationInfo
-import com.bytedance.scene.animation.NavigationAnimationEndAction
 import com.bytedance.scene.animation.NavigationAnimationExecutor
+import com.bytedance.scene.animation.NavigationAnimationListener
 import com.bytedance.scene.logger.LoggerManager
 import com.bytedance.scene.utlity.CancellationSignal
 
@@ -33,7 +33,7 @@ class MutableAnimationExecutor(
             value.setDisableRemoveView(this.mDisableRemoveView)
             value.setAnimationEndAction(this.mCustomAnimationEndAction)
             value.setAnimationViewGroup(this.mAnimationViewGroup)
-            value.replaceAnimationEndActionList(this.mCustomAnimationEndActionList)
+            value.replaceAnimationListenerList(this.mAnimationListenerList)
             this._delegated = value
         }
 
@@ -56,14 +56,19 @@ class MutableAnimationExecutor(
         _delegated.setAnimationViewGroup(viewGroup)
     }
 
-    override fun addAnimationEndAction(endAction: NavigationAnimationEndAction) {
-        super.addAnimationEndAction(endAction)
-        _delegated.addAnimationEndAction(endAction)
+    override fun addAnimationListener(listener: NavigationAnimationListener) {
+        super.addAnimationListener(listener)
+        _delegated.addAnimationListener(listener)
     }
 
-    override fun removeAnimationEndAction(endAction: NavigationAnimationEndAction) {
-        super.removeAnimationEndAction(endAction)
-        _delegated.removeAnimationEndAction(endAction)
+    override fun removeAnimationListener(listener: NavigationAnimationListener) {
+        super.removeAnimationListener(listener)
+        _delegated.removeAnimationListener(listener)
+    }
+
+    override fun replaceAnimationListenerList(listenerList: List<NavigationAnimationListener?>?) {
+        super.replaceAnimationListenerList(listenerList)
+        _delegated.replaceAnimationListenerList(listenerList)
     }
 
     override fun executePopChangeCancelable(

@@ -15,8 +15,16 @@
  */
 package com.bytedance.scene.animation
 
-interface NavigationAnimationEndAction {
+interface NavigationAnimationListener {
+    fun onPushStart() {
+
+    }
+
     fun onPushEnd() {
+
+    }
+
+    fun onPopStart() {
 
     }
 

@@ -44,7 +44,7 @@ import androidx.annotation.RestrictTo;
 public abstract class NavigationAnimationExecutor {
     protected ViewGroup mAnimationViewGroup;
     protected Runnable mCustomAnimationEndAction;
-    protected List<NavigationAnimationEndAction> mCustomAnimationEndActionList = null;
+    protected List<NavigationAnimationListener> mAnimationListenerList = null;
     protected boolean mDisableRemoveView;
 
     public void setAnimationViewGroup(@NonNull ViewGroup viewGroup) {
@@ -52,24 +52,24 @@ public abstract class NavigationAnimationExecutor {
     }
 
     /**
-     * use addAnimationEndAction/removeAnimationEndAction instead
+     * use addAnimationListener/removeAnimationListener instead
      */
     @Deprecated
     public void setAnimationEndAction(Runnable endAction){
         mCustomAnimationEndAction = endAction;
     }
 
-    public void addAnimationEndAction(@NonNull NavigationAnimationEndAction endAction) {
-        if (this.mCustomAnimationEndActionList == null) {
-            this.mCustomAnimationEndActionList = new ArrayList<>();
+    public void addAnimationListener(@NonNull NavigationAnimationListener listener) {
+        if (this.mAnimationListenerList == null) {
+            this.mAnimationListenerList = new ArrayList<>();
         }
-        this.mCustomAnimationEndActionList.add(endAction);
+        this.mAnimationListenerList.add(listener);
     }
 
-    public void removeAnimationEndAction(@NonNull NavigationAnimationEndAction endAction) {
-        List<NavigationAnimationEndAction> endActionList = this.mCustomAnimationEndActionList;
-        if (endActionList != null) {
-            endActionList.remove(endAction);
+    public void removeAnimationListener(@NonNull NavigationAnimationListener listener) {
+        List<NavigationAnimationListener> listenerList = this.mAnimationListenerList;
+        if (listenerList != null) {
+            listenerList.remove(listener);
         }
     }
 
@@ -77,8 +77,8 @@ public abstract class NavigationAnimationExecutor {
      * @hide
      */
     @RestrictTo(LIBRARY_GROUP)
-    public void replaceAnimationEndActionList(@Nullable List<NavigationAnimationEndAction> endActionList) {
-        this.mCustomAnimationEndActionList = endActionList;
+    public void replaceAnimationListenerList(@Nullable List<NavigationAnimationListener> listenerList) {
+        this.mAnimationListenerList = listenerList;
     }
 
     public void setDisableRemoveView(boolean disableRemoveView) { mDisableRemoveView = disableRemoveView; }
@@ -92,6 +92,14 @@ public abstract class NavigationAnimationExecutor {
                                         @NonNull final CancellationSignalList cancellationSignal,
                                         @NonNull final Action1<Boolean> suppressRecycleAction,
                                         @NonNull final Runnable endAction) {
+        List<NavigationAnimationListener> listenerList = mAnimationListenerList;
+        if (listenerList != null) {
+            List<NavigationAnimationListener> tmp = new ArrayList<>(listenerList);
+            for (NavigationAnimationListener listener : tmp) {
+                listener.onPushStart();
+            }
+        }
+
         navigationScene.requestDisableTouchEvent(true);
         suppressRecycleAction.execute(true);
         final View fromView = fromInfo.mSceneView;
@@ -127,11 +135,11 @@ public abstract class NavigationAnimationExecutor {
                     mCustomAnimationEndAction.run();
                 }
 
-                List<NavigationAnimationEndAction> endActionList = mCustomAnimationEndActionList;
-                if (endActionList != null) {
-                    List<NavigationAnimationEndAction> tmp = new ArrayList<>(endActionList);
-                    for (NavigationAnimationEndAction runnable : tmp) {
-                        runnable.onPushEnd();
+                List<NavigationAnimationListener> listenerList = mAnimationListenerList;
+                if (listenerList != null) {
+                    List<NavigationAnimationListener> tmp = new ArrayList<>(listenerList);
+                    for (NavigationAnimationListener listener : tmp) {
+                        listener.onPushEnd();
                     }
                 }
             }
@@ -192,6 +200,14 @@ public abstract class NavigationAnimationExecutor {
                                        @NonNull final CancellationSignalList cancellationSignal,
                                        @NonNull final Action1<Boolean> suppressRecycleAction,
                                        @NonNull final Runnable endAction) {
+        List<NavigationAnimationListener> listenerList = mAnimationListenerList;
+        if (listenerList != null) {
+            List<NavigationAnimationListener> tmp = new ArrayList<>(listenerList);
+            for (NavigationAnimationListener listener : tmp) {
+                listener.onPopStart();
+            }
+        }
+
         navigationScene.requestDisableTouchEvent(true);
         suppressRecycleAction.execute(true);
         final Runnable popEndAction = new Runnable() {
@@ -204,11 +220,11 @@ public abstract class NavigationAnimationExecutor {
                     mCustomAnimationEndAction.run();
                 }
 
-                List<NavigationAnimationEndAction> endActionList = mCustomAnimationEndActionList;
-                if (endActionList != null) {
-                    List<NavigationAnimationEndAction> tmp = new ArrayList<>(endActionList);
-                    for (NavigationAnimationEndAction runnable : tmp) {
-                        runnable.onPopEnd();
+                List<NavigationAnimationListener> listenerList = mAnimationListenerList;
+                if (listenerList != null) {
+                    List<NavigationAnimationListener> tmp = new ArrayList<>(listenerList);
+                    for (NavigationAnimationListener listener : tmp) {
+                        listener.onPopEnd();
                     }
                 }
             }
