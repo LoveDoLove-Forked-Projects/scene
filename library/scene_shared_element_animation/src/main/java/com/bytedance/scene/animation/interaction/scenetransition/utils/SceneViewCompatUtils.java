@@ -49,7 +49,9 @@ public class SceneViewCompatUtils {
     private static final SceneViewCompatUtilsImpl IMPL;
 
     static {
-        if (Build.VERSION.SDK_INT >= 22) {
+        if (Build.VERSION.SDK_INT >= 29) {
+            IMPL = new SceneViewCompatUtilsApi29();
+        } else if (Build.VERSION.SDK_INT >= 22) {
             IMPL = new SceneViewCompatUtilsApi22();
         } else {
             IMPL = new SceneViewCompatUtilsApi21();
