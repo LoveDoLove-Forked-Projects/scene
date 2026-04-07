@@ -13,263 +13,244 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.bytedance.scene.animation.animatorexecutor;
+package com.bytedance.scene.animation.animatorexecutor
 
-import android.app.Activity;
-import android.os.Build;
-import android.provider.Settings;
-import android.view.View;
-
-import androidx.annotation.AnimRes;
-import androidx.annotation.AnimatorRes;
-import androidx.annotation.NonNull;
-import androidx.core.view.ViewCompat;
-
-import com.bytedance.scene.Scene;
-import com.bytedance.scene.State;
-import com.bytedance.scene.animation.AnimationInfo;
-import com.bytedance.scene.animation.AnimationOrAnimator;
-import com.bytedance.scene.animation.NavigationAnimationExecutor;
-import com.bytedance.scene.utlity.AnimatorUtility;
-import com.bytedance.scene.utlity.CancellationSignal;
-import com.bytedance.scene.utlity.NavigationUtilityKt;
+import android.app.Activity
+import android.provider.Settings
+import android.view.View
+import androidx.annotation.AnimRes
+import androidx.annotation.AnimatorRes
+import androidx.core.view.ViewCompat
+import com.bytedance.scene.Scene
+import com.bytedance.scene.State
+import com.bytedance.scene.animation.AnimationInfo
+import com.bytedance.scene.animation.AnimationOrAnimator
+import com.bytedance.scene.animation.NavigationAnimationExecutor
+import com.bytedance.scene.utlity.AnimatorUtility
+import com.bytedance.scene.utlity.CancellationSignal
+import com.bytedance.scene.utlity.syncMaxDuration
 
 /**
  * Created by JiangQi on 10/27/25.
- * <p>
+ *
+ *
  * A -> B
  * A Exit, B Enter
- * <p>
+ *
+ *
  * B -> A
  * B Return, A Reenter
  *
  * animation duration will be affected by device Settings.Global.TRANSITION_ANIMATION_SCALE
  */
-public final class AnimationOrAnimatorResourceExecutor2 extends NavigationAnimationExecutor {
-    private AnimationOrAnimator mEnterAnimator;
-    private AnimationOrAnimator mExitAnimator;
-    private AnimationOrAnimator mReturnAnimator;
-    private AnimationOrAnimator mReenterAnimator;
+class AnimationOrAnimatorResourceExecutor2 : NavigationAnimationExecutor {
+    private var enterAnimator: AnimationOrAnimator? = null
+    private var exitAnimator: AnimationOrAnimator? = null
+    private var returnAnimator: AnimationOrAnimator? = null
+    private var reenterAnimator: AnimationOrAnimator? = null
 
-    public AnimationOrAnimatorResourceExecutor2(@NonNull Activity activity, @AnimatorRes @AnimRes int enterResId, @AnimatorRes @AnimRes int exitResId, boolean syncAnimationsDuration) {
+    constructor(
+        activity: Activity,
+        @AnimatorRes @AnimRes enterResId: Int,
+        @AnimatorRes @AnimRes exitResId: Int,
+        syncAnimationsDuration: Boolean
+    ) {
         if (enterResId != 0) {
-            this.mEnterAnimator = AnimationOrAnimator.loadAnimation(activity, enterResId);
-            this.mReturnAnimator = AnimationOrAnimator.loadAnimation(activity, enterResId);
-            this.mReturnAnimator.reverse();
+            this.enterAnimator = AnimationOrAnimator.loadAnimation(activity, enterResId)
+            this.returnAnimator = AnimationOrAnimator.loadAnimation(activity, enterResId).also {
+                it.reverse()
+            }
         }
         if (exitResId != 0) {
-            this.mExitAnimator = AnimationOrAnimator.loadAnimation(activity, exitResId);
-            this.mReenterAnimator = AnimationOrAnimator.loadAnimation(activity, exitResId);
-            this.mReenterAnimator.reverse();
+            this.exitAnimator = AnimationOrAnimator.loadAnimation(activity, exitResId)
+            this.reenterAnimator = AnimationOrAnimator.loadAnimation(activity, exitResId).also {
+                it.reverse()
+            }
         }
 
         if (syncAnimationsDuration) {
-            this.syncAnimationDurationToMaxDuration();
+            this.syncAnimationDurationToMaxDuration()
         }
     }
 
-    public AnimationOrAnimatorResourceExecutor2(@NonNull Activity activity, @AnimatorRes @AnimRes int enterResId, @AnimatorRes @AnimRes int exitResId, @AnimatorRes @AnimRes int returnResId, @AnimatorRes @AnimRes int reenterResId, boolean syncAnimationsDuration) {
+    constructor(
+        activity: Activity,
+        @AnimatorRes @AnimRes enterResId: Int,
+        @AnimatorRes @AnimRes exitResId: Int,
+        @AnimatorRes @AnimRes returnResId: Int,
+        @AnimatorRes @AnimRes reenterResId: Int,
+        syncAnimationsDuration: Boolean
+    ) {
         if (enterResId != 0) {
-            this.mEnterAnimator = AnimationOrAnimator.loadAnimation(activity, enterResId);
+            this.enterAnimator = AnimationOrAnimator.loadAnimation(activity, enterResId)
         }
         if (exitResId != 0) {
-            this.mExitAnimator = AnimationOrAnimator.loadAnimation(activity, exitResId);
+            this.exitAnimator = AnimationOrAnimator.loadAnimation(activity, exitResId)
         }
         if (returnResId != 0) {
-            this.mReturnAnimator = AnimationOrAnimator.loadAnimation(activity, returnResId);
+            this.returnAnimator = AnimationOrAnimator.loadAnimation(activity, returnResId)
         }
         if (reenterResId != 0) {
-            this.mReenterAnimator = AnimationOrAnimator.loadAnimation(activity, reenterResId);
+            this.reenterAnimator = AnimationOrAnimator.loadAnimation(activity, reenterResId)
         }
 
         if (syncAnimationsDuration) {
-            this.syncAnimationDurationToMaxDuration();
+            this.syncAnimationDurationToMaxDuration()
         }
     }
 
-    private void syncAnimationDurationToMaxDuration() {
-        if (this.mEnterAnimator != null && this.mExitAnimator != null) {
-            NavigationUtilityKt.syncMaxDuration(mEnterAnimator, mExitAnimator);
+    private fun syncAnimationDurationToMaxDuration() {
+        if (this.enterAnimator != null && this.exitAnimator != null) {
+            syncMaxDuration(enterAnimator, exitAnimator)
         }
-        if (this.mReturnAnimator != null && this.mReenterAnimator != null) {
-            NavigationUtilityKt.syncMaxDuration(mReturnAnimator, mReenterAnimator);
+        if (this.returnAnimator != null && this.reenterAnimator != null) {
+            syncMaxDuration(returnAnimator, reenterAnimator)
         }
     }
 
-    @Override
-    public boolean isSupport(@NonNull Class<? extends Scene> from, @NonNull Class<? extends Scene> to) {
-        return true;
+    override fun isSupport(from: Class<out Scene?>, to: Class<out Scene?>): Boolean {
+        return true
     }
 
-    @Override
-    public void executePushChangeCancelable(@NonNull final AnimationInfo fromInfo, @NonNull final AnimationInfo toInfo, @NonNull final Runnable endAction, @NonNull CancellationSignal cancellationSignal) {
-        if (mEnterAnimator == null && mExitAnimator == null) {
-            endAction.run();
-            return;
+    override fun executePushChangeCancelable(
+        fromInfo: AnimationInfo,
+        toInfo: AnimationInfo,
+        endAction: Runnable,
+        cancellationSignal: CancellationSignal
+    ) {
+        if (enterAnimator == null && exitAnimator == null) {
+            endAction.run()
+            return
         }
 
         // Cannot be placed in onAnimationStart, as there it a post interval, it will splash
-        final View fromView = fromInfo.mSceneView;
-        final View toView = toInfo.mSceneView;
+        val fromView = fromInfo.mSceneView
+        val toView = toInfo.mSceneView
 
-        AnimatorUtility.resetViewStatus(fromView);
-        AnimatorUtility.resetViewStatus(toView);
-        fromView.setVisibility(View.VISIBLE);
+        AnimatorUtility.resetViewStatus(fromView)
+        AnimatorUtility.resetViewStatus(toView)
+        fromView.visibility = View.VISIBLE
 
-        final float fromViewElevation = ViewCompat.getElevation(fromView);
+        val fromViewElevation = ViewCompat.getElevation(fromView)
         if (fromViewElevation > 0) {
-            ViewCompat.setElevation(fromView, 0);
+            ViewCompat.setElevation(fromView, 0f)
         }
 
         // In the case of pushAndClear, it is possible that the Scene come from has been destroyed.
         if (!mDisableRemoveView) {
             if (fromInfo.mSceneState.value < State.VIEW_CREATED.value) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    mAnimationViewGroup.getOverlay().add(fromView);
-                } else {
-                    mAnimationViewGroup.addView(fromView);
-                }
+                mAnimationViewGroup.getOverlay().add(fromView)
             }
         }
 
-        Runnable animationEndAction = new CountRunnable(2, new Runnable() {
-            @Override
-            public void run() {
-                if (!toInfo.mIsTranslucent) {
-                    fromView.setVisibility(View.GONE);
-                }
-
-                if (fromViewElevation > 0) {
-                    ViewCompat.setElevation(fromView, fromViewElevation);
-                }
-
-                AnimatorUtility.resetViewStatus(fromView);
-                AnimatorUtility.resetViewStatus(toView);
-
-                if (!mDisableRemoveView) {
-                    if (fromInfo.mSceneState.value < State.VIEW_CREATED.value) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                            mAnimationViewGroup.getOverlay().remove(fromView);
-                        } else {
-                            mAnimationViewGroup.removeView(fromView);
-                        }
-                    }
-                }
-                endAction.run();
+        val animationEndAction: Runnable = CountRunnable(2) {
+            if (!toInfo.mIsTranslucent) {
+                fromView.visibility = View.GONE
             }
-        });
 
-        if (mEnterAnimator != null) {
-            mEnterAnimator.addEndAction(animationEndAction);
-            mEnterAnimator.applySystemDurationScale(toView, Settings.Global.TRANSITION_ANIMATION_SCALE);
-            mEnterAnimator.start(toView);
+            if (fromViewElevation > 0) {
+                ViewCompat.setElevation(fromView, fromViewElevation)
+            }
+
+            AnimatorUtility.resetViewStatus(fromView)
+            AnimatorUtility.resetViewStatus(toView)
+
+            if (!mDisableRemoveView) {
+                if (fromInfo.mSceneState.value < State.VIEW_CREATED.value) {
+                    mAnimationViewGroup.getOverlay().remove(fromView)
+                }
+            }
+            endAction.run()
+        }
+
+        if (enterAnimator != null) {
+            enterAnimator!!.addEndAction(animationEndAction)
+            enterAnimator!!.applySystemDurationScale(
+                toView, Settings.Global.TRANSITION_ANIMATION_SCALE
+            )
+            enterAnimator!!.start(toView)
         } else {
-            animationEndAction.run();
+            animationEndAction.run()
         }
-        if (mExitAnimator != null) {
-            mExitAnimator.addEndAction(animationEndAction);
-            mExitAnimator.applySystemDurationScale(fromView, Settings.Global.TRANSITION_ANIMATION_SCALE);
-            mExitAnimator.start(fromView);
+        if (exitAnimator != null) {
+            exitAnimator?.addEndAction(animationEndAction)
+            exitAnimator?.applySystemDurationScale(
+                fromView, Settings.Global.TRANSITION_ANIMATION_SCALE
+            )
+            exitAnimator?.start(fromView)
         } else {
-            animationEndAction.run();
+            animationEndAction.run()
         }
 
-        cancellationSignal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
-            @Override
-            public void onCancel() {
-                if (mEnterAnimator != null) {
-                    mEnterAnimator.end();
-                }
-                if (mExitAnimator != null) {
-                    mExitAnimator.end();
-                }
-            }
-        });
+        cancellationSignal.setOnCancelListener {
+            enterAnimator?.end()
+            exitAnimator?.end()
+        }
     }
 
-    @Override
-    public void executePopChangeCancelable(@NonNull AnimationInfo fromInfo, @NonNull AnimationInfo toInfo, @NonNull final Runnable endAction, @NonNull CancellationSignal cancellationSignal) {
-        if (mReturnAnimator == null && mReenterAnimator == null) {
-            endAction.run();
-            return;
+    override fun executePopChangeCancelable(
+        fromInfo: AnimationInfo,
+        toInfo: AnimationInfo,
+        endAction: Runnable,
+        cancellationSignal: CancellationSignal
+    ) {
+        if (returnAnimator == null && reenterAnimator == null) {
+            endAction.run()
+            return
         }
 
-        final View fromView = fromInfo.mSceneView;
-        final View toView = toInfo.mSceneView;
+        val fromView = fromInfo.mSceneView
+        val toView = toInfo.mSceneView
 
-        AnimatorUtility.resetViewStatus(fromView);
-        AnimatorUtility.resetViewStatus(toView);
+        AnimatorUtility.resetViewStatus(fromView)
+        AnimatorUtility.resetViewStatus(toView)
 
-        fromView.setVisibility(View.VISIBLE);
+        fromView.visibility = View.VISIBLE
 
         if (!mDisableRemoveView) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                mAnimationViewGroup.getOverlay().add(fromView);
-            } else {
-                mAnimationViewGroup.addView(fromView);
-            }
+            mAnimationViewGroup.getOverlay().add(fromView)
         }
 
-        Runnable animationEndAction = new CountRunnable(2, new Runnable() {
-            @Override
-            public void run() {
-                // Todo: children also has to reset
-                AnimatorUtility.resetViewStatus(fromView);
-                AnimatorUtility.resetViewStatus(toView);
+        val animationEndAction: Runnable = CountRunnable(2) { // Todo: children also has to reset
+            AnimatorUtility.resetViewStatus(fromView)
+            AnimatorUtility.resetViewStatus(toView)
 
-                if (!mDisableRemoveView) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                        mAnimationViewGroup.getOverlay().remove(fromView);
-                    } else {
-                        mAnimationViewGroup.removeView(fromView);
-                    }
-                }
-                endAction.run();
+            if (!mDisableRemoveView) {
+                mAnimationViewGroup.getOverlay().remove(fromView)
             }
-        });
+            endAction.run()
+        }
 
-        if (mReturnAnimator != null) {
-            mReturnAnimator.addEndAction(animationEndAction);
-            mReturnAnimator.applySystemDurationScale(fromView, Settings.Global.TRANSITION_ANIMATION_SCALE);
-            mReturnAnimator.start(fromView);
+        if (returnAnimator != null) {
+            returnAnimator?.addEndAction(animationEndAction)
+            returnAnimator?.applySystemDurationScale(
+                fromView, Settings.Global.TRANSITION_ANIMATION_SCALE
+            )
+            returnAnimator?.start(fromView)
         } else {
-            animationEndAction.run();
+            animationEndAction.run()
         }
 
-        if (mReenterAnimator != null) {
-            mReenterAnimator.addEndAction(animationEndAction);
-            mReenterAnimator.applySystemDurationScale(toView, Settings.Global.TRANSITION_ANIMATION_SCALE);
-            mReenterAnimator.start(toView);
+        if (reenterAnimator != null) {
+            reenterAnimator?.addEndAction(animationEndAction)
+            reenterAnimator?.applySystemDurationScale(
+                toView, Settings.Global.TRANSITION_ANIMATION_SCALE
+            )
+            reenterAnimator?.start(toView)
         } else {
-            animationEndAction.run();
+            animationEndAction.run()
         }
-        cancellationSignal.setOnCancelListener(new CancellationSignal.OnCancelListener() {
-            @Override
-            public void onCancel() {
-                if (mReturnAnimator != null) {
-                    mReturnAnimator.end();
-                }
-                if (mReenterAnimator != null) {
-                    mReenterAnimator.end();
-                }
-            }
-        });
+        cancellationSignal.setOnCancelListener {
+            returnAnimator?.end()
+            reenterAnimator?.end()
+        }
     }
 
-    private static class CountRunnable implements Runnable {
-        int count;
-        Runnable runnable;
-
-        private CountRunnable(int count, Runnable runnable) {
-            this.count = count;
-            this.runnable = runnable;
-        }
-
-        @Override
-        public void run() {
-            count--;
+    private class CountRunnable(var count: Int, var runnable: Runnable) : Runnable {
+        override fun run() {
+            count--
             if (count == 0) {
-                runnable.run();
+                runnable.run()
             }
         }
     }
