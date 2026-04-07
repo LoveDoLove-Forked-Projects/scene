@@ -231,4 +231,24 @@ public class AnimationOrAnimator {
             this.animator.end();
         }
     }
+
+    public long getDuration() {
+        if (this.animation != null) {
+            return this.animation.getDuration();
+        } else if (this.animator != null) {
+            return this.animator.getDuration();
+        } else {
+            throw new IllegalStateException("Animation or Animator not found");
+        }
+    }
+
+    public void setDuration(long duration) {
+        if (this.animation != null) {
+            this.animation.setDuration(duration);
+        } else if (this.animator != null) {
+            this.animator.setDuration(duration);
+        } else {
+            throw new IllegalStateException("Animation or Animator not found");
+        }
+    }
 }
