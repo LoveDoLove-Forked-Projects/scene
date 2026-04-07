@@ -17,11 +17,14 @@ package com.bytedance.scene.animation.interaction.scenetransition;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.bytedance.scene.animation.interaction.progressanimation.InteractionAnimation;
 
@@ -36,6 +39,8 @@ public abstract class SceneTransition implements Cloneable {
     protected View mToView;
     @NonNull
     protected View mAnimationView;
+    @Nullable
+    protected TimeInterpolator mInterpolator =null;
 
     @CallSuper
     public void captureValue(@NonNull View fromView, @NonNull View toView, @NonNull View animationView) {
@@ -48,6 +53,15 @@ public abstract class SceneTransition implements Cloneable {
     }
 
     public abstract InteractionAnimation getAnimation(boolean push);
+
+    public void setInterpolator(@Nullable TimeInterpolator value) {
+        this.mInterpolator = value;
+    }
+
+    @Nullable
+    public TimeInterpolator getInterpolator() {
+        return this.mInterpolator;
+    }
 
     public Animator getAnimator(final boolean appear) {
         final InteractionAnimation interactionAnimation = getAnimation(appear);
@@ -65,6 +79,9 @@ public abstract class SceneTransition implements Cloneable {
                 interactionAnimation.dispatchProgress(1.0f);
             }
         });
+        if (this.mInterpolator != null) {
+            valueAnimator.setInterpolator(this.mInterpolator);
+        }
         return valueAnimator;
     }
 

@@ -17,6 +17,7 @@ package com.bytedance.scene.animation.interaction.scenetransition.visiblity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.graphics.Rect;
 import android.view.View;
@@ -44,6 +45,9 @@ public abstract class SceneVisibilityTransition implements Cloneable {
 
     private long mDuration = 300L;
 
+    @Nullable
+    protected TimeInterpolator mInterpolator =null;
+
     @CallSuper
     public void captureValue(@NonNull View view, @NonNull ViewGroup rootView) {
         this.mView = view;
@@ -51,6 +55,15 @@ public abstract class SceneVisibilityTransition implements Cloneable {
         if (this.mPropagation != null) {
             this.mTransitionPropagationResult = mPropagation.captureValues(view, rootView);
         }
+    }
+
+    public void setInterpolator(@Nullable TimeInterpolator value) {
+        this.mInterpolator = value;
+    }
+
+    @Nullable
+    public TimeInterpolator getInterpolator() {
+        return this.mInterpolator;
     }
 
     public abstract InteractionAnimation getAnimation(boolean appear);
@@ -76,6 +89,9 @@ public abstract class SceneVisibilityTransition implements Cloneable {
             valueAnimator.setStartDelay(this.mPropagation.getStartDelay(this.mRootView, this, this.mTransitionPropagationResult, appear));
         }
         valueAnimator.setDuration(this.mDuration);
+        if (this.mInterpolator != null) {
+            valueAnimator.setInterpolator(this.mInterpolator);
+        }
         return valueAnimator;
     }
 
