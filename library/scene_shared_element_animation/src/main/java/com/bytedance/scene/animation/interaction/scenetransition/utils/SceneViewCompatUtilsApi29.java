@@ -19,6 +19,7 @@ import android.annotation.TargetApi;
 import android.graphics.Matrix;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
@@ -35,5 +36,35 @@ class SceneViewCompatUtilsApi29 extends SceneViewCompatUtilsApi22 {
     @Override
     public void setAnimationMatrix(@NonNull View view, Matrix matrix) {
         view.setAnimationMatrix(matrix);
+    }
+
+    @Override
+    public void transformMatrixToGlobal(@NonNull View view, @NonNull Matrix matrix) {
+        view.transformMatrixToGlobal(matrix);
+    }
+
+    @Override
+    public void transformMatrixToLocal(@NonNull View view, @NonNull Matrix matrix) {
+        view.transformMatrixToLocal(matrix);
+    }
+
+    @Override
+    public void animateTransform(ImageView view, Matrix matrix) {
+        view.animateTransform(matrix);
+    }
+
+    @Override
+    public void setLeftTopRightBottom(View v, int left, int top, int right, int bottom) {
+        v.setLeftTopRightBottom(left, top, right, bottom);
+    }
+
+    @Override
+    public void setTransitionAlpha(@NonNull View view, float alpha) {
+        view.setTransitionAlpha(alpha);
+    }
+
+    @Override
+    public float getTransitionAlpha(@NonNull View view) {
+        return view.getTransitionAlpha();
     }
 }
