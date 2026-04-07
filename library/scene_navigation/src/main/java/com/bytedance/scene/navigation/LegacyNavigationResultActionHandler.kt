@@ -65,28 +65,29 @@ class NavigationResultActionHandler(private val managerAbility: NavigationManage
             "PushResultCallback must extends CallerAwarePushResultCallback"
         }
 
-        var callerScene = pushResultCallback.callerSceneRef.get()
-        if (callerScene == null) {
+        val originalCallerScene = pushResultCallback.callerSceneRef.get()
+        if (originalCallerScene == null) {
             LoggerManager.getInstance().e(
                 TAG, "This scene is already destroyed, has been garbage collected"
             )
             return
         }
 
-        if (callerScene.parentScene == null) {
-            LoggerManager.getInstance().e(TAG, "This scene is not created or already destroyed")
+        if (originalCallerScene.parentScene == null) {
+            LoggerManager.getInstance()
+                .e(TAG, "This scene is not created or already destroyed, $originalCallerScene")
             return
         }
 
         val navigationScene = this.managerAbility.navigationScene
-        callerScene = findTargetChildScene(callerScene, navigationScene)
+        val actualCallerScene = findTargetChildScene(originalCallerScene, navigationScene)
 
-        if (callerScene == null) {
-            throw IllegalArgumentException("This scene is not belong to current NavigationScene")
+        if (actualCallerScene == null) {
+            throw IllegalArgumentException("This scene is not belong to current NavigationScene, $originalCallerScene")
         }
 
-        val callerRecord = managerAbility.getRecordByScene(callerScene)
-            ?: throw IllegalArgumentException("Caller record not found")
+        val callerRecord = managerAbility.getRecordByScene(actualCallerScene)
+            ?: throw IllegalArgumentException("Caller record not found for $actualCallerScene, original scene is $originalCallerScene")
         bindCallerAndCalleeTogether(callerRecord, calleeRecord, pushResultCallback)
     }
 
