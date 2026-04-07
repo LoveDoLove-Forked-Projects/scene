@@ -24,6 +24,8 @@ import android.view.Window;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 
+import com.bytedance.scene.utlity.SystemBarFlagUtility;
+
 /**
  * Created by JiangQi on 7/30/18.
  */
@@ -123,6 +125,42 @@ class ActivityStatusRecord implements Parcelable {
 
         activity.setRequestedOrientation(mRequestedOrientation);
         restoreSystemBarsAppearance(window);
+    }
+
+    public void restoreNonSystemBarStatus(Activity activity){
+        Window window = activity.getWindow();
+        window.setSoftInputMode(mSoftInputMode);
+        activity.setRequestedOrientation(mRequestedOrientation);
+
+        //We should use latest SystemUiVisibility/WindowFlags NavigationBar/StatusBar data to override mSystemUiVisibility/mWindowFlags
+        // to make sure we don't change NavigationBar/StatusBar
+        View decorView = window.getDecorView();
+        int currentSystemUiVisibility = decorView.getSystemUiVisibility();
+        int cachedSystemUiVisibility = mSystemUiVisibility;
+        if (currentSystemUiVisibility != cachedSystemUiVisibility) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                cachedSystemUiVisibility = SystemBarFlagUtility.restoreTargetFlagFromRightToLeft(cachedSystemUiVisibility, currentSystemUiVisibility, View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                cachedSystemUiVisibility = SystemBarFlagUtility.restoreTargetFlagFromRightToLeft(cachedSystemUiVisibility, currentSystemUiVisibility, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+            }
+            window.getDecorView().setSystemUiVisibility(cachedSystemUiVisibility);
+        }
+
+        int currentFlags = window.getAttributes().flags;
+        int previousFlags = mWindowFlags;
+        if (currentFlags != previousFlags) {
+            previousFlags = SystemBarFlagUtility.restoreTargetFlagFromRightToLeft(previousFlags, currentFlags, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            previousFlags = SystemBarFlagUtility.restoreTargetFlagFromRightToLeft(previousFlags, currentFlags, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            previousFlags = SystemBarFlagUtility.restoreTargetFlagFromRightToLeft(previousFlags, currentFlags, WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+            int commonFlags = currentFlags & previousFlags;
+            int clearFlags = previousFlags & ~commonFlags;
+            window.addFlags(clearFlags);
+
+            int addFlags = currentFlags & ~commonFlags;
+            window.clearFlags(addFlags);
+        }
     }
 
     private void restoreSystemBarsAppearance(Window window) {

@@ -9,6 +9,7 @@ import com.bytedance.scene.SceneTrace;
 import com.bytedance.scene.animation.NavigationAnimationExecutor;
 import com.bytedance.scene.interfaces.Function;
 import com.bytedance.scene.interfaces.PopOptions;
+import com.bytedance.scene.navigation.SystemBarRestoreFlag;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
 import com.bytedance.scene.navigation.NavigationSceneManager;
@@ -131,9 +132,10 @@ public class CoordinatePopCountOperation implements Operation {
             };
             popDestroyTask = tmpPopDestroyTask;
         } else {
+            SystemBarRestoreFlag systemBarRestoreFlag = new SystemBarRestoreFlag();
             final PopDestroyMiddlePageOperationV2 clearMiddlePageOperationV2 = new PopDestroyMiddlePageOperationV2(this.mManagerAbility, destroyRecordList, currentRecord);
-            final PopAnimationOperationV2 animationOperationV2 = new PopAnimationOperationV2(this.mManagerAbility, mAnimationFactory, destroyRecordList, currentRecord, returnRecord, currentScene, delayStopToAnimEnd);
-            final PopDestroyOperationV2 popDestroyOperationV2 = new PopDestroyOperationV2(this.mManagerAbility, currentRecord, returnRecord);
+            final PopAnimationOperationV2 animationOperationV2 = new PopAnimationOperationV2(this.mManagerAbility, mAnimationFactory, destroyRecordList, currentRecord, returnRecord, currentScene, delayStopToAnimEnd, systemBarRestoreFlag);
+            final PopDestroyOperationV2 popDestroyOperationV2 = new PopDestroyOperationV2(this.mManagerAbility, currentRecord, returnRecord, systemBarRestoreFlag);
 
             final NavigationRunnable popDestroyOperationV2Task = new NavigationRunnable() {
                 @Override
@@ -189,7 +191,7 @@ public class CoordinatePopCountOperation implements Operation {
         final Scene currentScene = currentRecord.mScene;
 
         final PopDestroyMiddlePageOperationV2 clearMiddlePageOperationV2 = new PopDestroyMiddlePageOperationV2(this.mManagerAbility, destroyRecordList, currentRecord);
-        final PopDestroyOperationV2 popDestroyOperationV2 = new PopDestroyOperationV2(this.mManagerAbility, currentRecord, returnRecord);
+        final PopDestroyOperationV2 popDestroyOperationV2 = new PopDestroyOperationV2(this.mManagerAbility, currentRecord, returnRecord, null);
 
         //skip animation if return target Scene is already destroyed and need to restore
         SceneTrace.beginSection(NavigationSceneManager.TRACE_EXECUTE_OPERATION_TAG);

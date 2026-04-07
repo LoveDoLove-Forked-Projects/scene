@@ -568,6 +568,15 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
     }
 
     @Override
+    public void restoreNonSystemBarStatus(@Nullable ActivityStatusRecord activityStatusRecord) {
+        if (activityStatusRecord == null) {
+            return;
+        }
+        Activity activity = mNavigationScene.getActivity();
+        activityStatusRecord.restoreNonSystemBarStatus(activity);
+    }
+
+    @Override
     public void restoreActivityStatusBarNavigationBarStatus(@Nullable ActivityStatusRecord activityStatusRecord) {
         if (activityStatusRecord == null) {
             return;

@@ -56,6 +56,8 @@ public interface NavigationManagerAbility {
 
     void restoreActivityStatus(@Nullable ActivityStatusRecord activityStatusRecord);
 
+    void restoreNonSystemBarStatus(@Nullable ActivityStatusRecord activityStatusRecord);
+
     void restoreActivityStatusBarNavigationBarStatus(@Nullable ActivityStatusRecord activityStatusRecord);
 
     NavigationSceneManager.CancellationSignalManager getCancellationSignalManager();

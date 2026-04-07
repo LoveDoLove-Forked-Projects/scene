@@ -4,9 +4,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bytedance.scene.Scene;
+import com.bytedance.scene.SceneGlobalConfig;
 import com.bytedance.scene.State;
 import com.bytedance.scene.animation.AnimationInfo;
 import com.bytedance.scene.animation.NavigationAnimationExecutor;
+import com.bytedance.scene.navigation.SystemBarRestoreFlag;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
 import com.bytedance.scene.navigation.Operation;
@@ -30,10 +32,11 @@ public class PopAnimationOperationV2 implements Operation {
     private final Record mReturnRecord;
     private final Scene mCurrentScene;
     private final boolean mNotRemoveView;
+    private final SystemBarRestoreFlag mSystemBarRestoreFlag;
 
     public final CancellationSignalList cancellationSignalList = new CancellationSignalList();
 
-    public PopAnimationOperationV2(NavigationManagerAbility navigationManagerAbility, NavigationAnimationExecutor animationFactory, List<Record> destroyRecordList, Record currentRecord, Record returnRecord, Scene currentScene, boolean notRemoveView) {
+    public PopAnimationOperationV2(NavigationManagerAbility navigationManagerAbility, NavigationAnimationExecutor animationFactory, List<Record> destroyRecordList, Record currentRecord, Record returnRecord, Scene currentScene, boolean notRemoveView, SystemBarRestoreFlag systemBarRestoreFlag) {
         this.mManagerAbility = navigationManagerAbility;
         this.mAnimationFactory = animationFactory;
         this.mNavigationScene = navigationManagerAbility.getNavigationScene();
@@ -41,6 +44,7 @@ public class PopAnimationOperationV2 implements Operation {
         this.mReturnRecord = returnRecord;
         this.mCurrentScene = currentScene;
         this.mNotRemoveView = notRemoveView;
+        this.mSystemBarRestoreFlag = systemBarRestoreFlag;
     }
 
     @Override
@@ -63,6 +67,9 @@ public class PopAnimationOperationV2 implements Operation {
 
         if (!this.mManagerAbility.isDisableNavigationAnimation() && isNavigationSceneInAnimationState && navigationAnimationExecutor != null && navigationAnimationExecutor.isSupport(mCurrentRecord.mScene.getClass(), mReturnRecord.mScene.getClass())) {
             this.mManagerAbility.restoreActivityStatusBarNavigationBarStatus(mReturnRecord.mActivityStatusRecord);
+            if (SceneGlobalConfig.onlyRestoreNonSystemBarAfterAnimation) {
+                this.mSystemBarRestoreFlag.markHasRestored();
+            }
 
             ViewGroup animationContainer = mNavigationScene.getAnimationContainer();
             // Ensure that the Z-axis is correct
