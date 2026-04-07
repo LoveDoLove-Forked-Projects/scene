@@ -15,11 +15,21 @@
  */
 package com.bytedance.scene.interfaces;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.bytedance.scene.Scene;
 
 /**
  * Created by JiangQi on 8/3/18.
  */
 public interface PushResultCallback {
     void onResult(@Nullable Object result);
+
+    /**
+     * Caller Scene is unavailable, it has already been popped from NavigationScene
+     */
+    default void onCallerSceneUnavailable(@NonNull Scene callerScene) {
+
+    }
 }

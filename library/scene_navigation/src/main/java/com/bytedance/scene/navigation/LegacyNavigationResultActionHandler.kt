@@ -87,7 +87,10 @@ class NavigationResultActionHandler(private val managerAbility: NavigationManage
         }
 
         val callerRecord = managerAbility.getRecordByScene(actualCallerScene)
-            ?: throw IllegalArgumentException("Caller record not found for $actualCallerScene, original scene is $originalCallerScene")
+        if (callerRecord == null) {
+            pushResultCallback.onCallerSceneUnavailable(originalCallerScene)
+            return
+        }
         bindCallerAndCalleeTogether(callerRecord, calleeRecord, pushResultCallback)
     }
 
