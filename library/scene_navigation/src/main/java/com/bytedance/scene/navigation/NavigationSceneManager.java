@@ -1707,11 +1707,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
         OnWindowFocusChangedScheduler.dispatchOnConfigurationChangedToRecordInternal(record, scene, newConfig, mConfigurationChangesAllowList, new Action1<Scene>() {
             @Override
             public void execute(Scene value) {
-                if (mNavigationScene.mNavigationSceneOptions.isRecreateSceneOnNextLoopAfterConfigurationChanged()) {
-                    recreate(value, SceneStateSaveReason.CONFIGURATION_CHANGED);
-                } else {
-                    executeOperationSafely(new RecreateOperation(mNavigationScene, NavigationSceneManager.this, mBackStackList, value, SceneStateSaveReason.CONFIGURATION_CHANGED), null);
-                }
+                recreate(value, SceneStateSaveReason.CONFIGURATION_CHANGED);
             }
         });
         LoggerManager.getInstance().i(TAG, "Activity dispatch onConfigurationChanged finish");
