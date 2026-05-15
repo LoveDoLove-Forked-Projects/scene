@@ -11,6 +11,7 @@ import com.bytedance.scene.queue.NavigationMessageQueue;
 import com.bytedance.scene.queue.NavigationRunnable;
 import com.bytedance.scene.utlity.CancellationSignal;
 import com.bytedance.scene.utlity.TaskStartSignal;
+import com.bytedance.scene.utlity.SceneInternalException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -532,5 +533,79 @@ public class NavigationMessageQueueTests {
         messageQueue.forceExecuteIdleTask();
         cancellationSignal.cancel();
         Assert.assertEquals("021", log.toString());
+    }
+
+    @Test
+    public void testRemove() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+        NavigationRunnable runnable = new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        };
+        messageQueue.postAsync(runnable);
+        messageQueue.remove(runnable);
+
+        shadowOf(getMainLooper()).idle();
+        Assert.assertEquals("", log.toString());
+    }
+
+    @Test
+    public void testPostUrgentAtHead() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        messageQueue.postUrgentAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("2", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("21", log.toString());
+    }
+
+    @Test(expected = SceneInternalException.class)
+    public void testNestedPostSyncThrows() {
+        final NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+        messageQueue.postSync(new Runnable() {
+            @Override
+            public void run() {
+                messageQueue.postSync(new Runnable() {
+                    @Override
+                    public void run() {
+                    }
+                });
+            }
+        });
+    }
+
+    @Test
+    public void testHasPendingTasks() {
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+        Assert.assertFalse(messageQueue.hasPendingTasks());
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+            }
+        });
+        Assert.assertTrue(messageQueue.hasPendingTasks());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertFalse(messageQueue.hasPendingTasks());
     }
 }
