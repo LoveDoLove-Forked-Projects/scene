@@ -7,7 +7,6 @@ import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.bytedance.scene.SceneGlobalConfig;
 import com.bytedance.scene.queue.NavigationMessageQueue;
 import com.bytedance.scene.queue.NavigationRunnable;
 import com.bytedance.scene.utlity.CancellationSignal;
@@ -482,7 +481,7 @@ public class NavigationMessageQueueTests {
                 log.append("2");
             }
         });
-        messageQueue.postAsyncDelayed(new NavigationRunnable() {
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
             @Override
             public void run() {
                 log.append("3");
@@ -516,7 +515,7 @@ public class NavigationMessageQueueTests {
                 log.append("2");
             }
         });
-        messageQueue.postAsyncDelayed(new NavigationRunnable() {
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
             @Override
             public void run() {
                 log.append("1");

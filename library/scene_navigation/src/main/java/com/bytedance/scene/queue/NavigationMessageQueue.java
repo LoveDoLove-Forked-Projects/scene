@@ -25,7 +25,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RestrictTo;
 import androidx.annotation.VisibleForTesting;
 
-import com.bytedance.scene.SceneGlobalConfig;
 import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.utlity.CancellationSignal;
 import com.bytedance.scene.utlity.SceneInternalException;
@@ -115,12 +114,17 @@ public class NavigationMessageQueue {
         }
     }
 
-    public void postAsyncDelayed(@NonNull final NavigationRunnable runnable, long timeOutMillis) {
-        this.postAsyncDelayed(runnable, null, null, timeOutMillis);
+    /**
+     * post a delayed(idle and timeout) task at the front of queue, it will delay all task too
+     * @param runnable
+     * @param timeOutMillis
+     */
+    public void postAsyncAtHeadIdleDelayed(@NonNull final NavigationRunnable runnable, long timeOutMillis) {
+        this.postAsyncAtHeadIdleDelayed(runnable, null, null, timeOutMillis);
     }
 
-    public void postAsyncDelayed(@NonNull final NavigationRunnable runnable, @Nullable TaskStartSignal taskStartSignal, @Nullable CancellationSignal cancellationSignal, long timeOutMillis) {
-        LoggerManager.getInstance().i(TAG, "postAsyncDelayed submit " + runnable.toString());
+    public void postAsyncAtHeadIdleDelayed(@NonNull final NavigationRunnable runnable, @Nullable TaskStartSignal taskStartSignal, @Nullable CancellationSignal cancellationSignal, long timeOutMillis) {
+        LoggerManager.getInstance().i(TAG, "postAsyncAtHeadIdleDelayed submit " + runnable.toString());
         this.forceExecuteIdleTask();
 
         if (this.mIdleRunnable != null) {
