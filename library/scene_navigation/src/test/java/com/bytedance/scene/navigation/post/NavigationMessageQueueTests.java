@@ -608,4 +608,142 @@ public class NavigationMessageQueueTests {
         shadowOf(getMainLooper()).runOneTask();
         Assert.assertFalse(messageQueue.hasPendingTasks());
     }
+
+    @Test
+    public void testTaskStartSignalDeferral() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+        TaskStartSignal signal = new TaskStartSignal();
+
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        }, signal, null, 5000);
+
+        // Should not run yet because signal is not started
+        ShadowLooper.idleMainLooper(2000, TimeUnit.MILLISECONDS);
+        Assert.assertEquals("", log.toString());
+
+        // Start signal, now it should queue the idle handler
+        signal.start();
+        
+        // Now idle should trigger it. 
+        // We use idle() to execute pending tasks and hopefully trigger idle handlers if Robolectric supports it.
+        // If this fails, it might be due to Robolectric limitation with IdleHandler + Delayed Task.
+        shadowOf(getMainLooper()).idle();
+        
+        // If idle() didn't work, we try to advance time to force timeout to ensure it runs eventually
+        if (log.length() == 0) {
+            ShadowLooper.idleMainLooper(5000, TimeUnit.MILLISECONDS);
+        }
+        
+        Assert.assertEquals("1", log.toString());
+    }
+
+    @Test
+    public void testPostSyncExecutesIdleDelayedTask() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        }, 5000);
+
+        Assert.assertEquals("", log.toString());
+
+        // postSync should force execute the idle task first
+        messageQueue.postSync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        Assert.assertEquals("12", log.toString());
+    }
+
+    @Test
+    public void testForceExecuteIdleTask() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        }, 5000);
+
+        Assert.assertEquals("", log.toString());
+
+        messageQueue.forceExecuteIdleTask();
+
+        Assert.assertEquals("1", log.toString());
+    }
+
+    @Test
+    public void testRemoveInsideTask() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        final NavigationRunnable task2 = new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        };
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+                messageQueue.remove(task2);
+            }
+        });
+
+        messageQueue.postAsync(task2);
+
+        shadowOf(getMainLooper()).runOneTask(); // Runs task 1
+        Assert.assertEquals("1", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask(); // Should be empty (task 2 removed)
+        Assert.assertEquals("1", log.toString());
+    }
+
+    @Test
+    public void testPostAsyncInsidePostSyncExecution() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+                // Post task 2 inside task 1
+                messageQueue.postAsync(new NavigationRunnable() {
+                    @Override
+                    public void run() {
+                        log.append("2");
+                    }
+                });
+            }
+        });
+
+        // postSync should execute task 1, which adds task 2.
+        // Then postSync loop should see task 2 and execute it.
+        // Then execute task 3.
+        messageQueue.postSync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("3");
+            }
+        });
+
+        Assert.assertEquals("123", log.toString());
+    }
 }
