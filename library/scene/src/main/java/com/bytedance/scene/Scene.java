@@ -41,7 +41,6 @@ import androidx.annotation.StyleRes;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.view.ViewCompat;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelStore;
@@ -58,7 +57,6 @@ import com.bytedance.scene.parcel.ParcelConstants;
 import com.bytedance.scene.utlity.ExceptionsUtility;
 import com.bytedance.scene.utlity.Experimental;
 import com.bytedance.scene.utlity.SceneInternalException;
-import com.bytedance.scene.utlity.ThreadUtility;
 import com.bytedance.scene.utlity.Utility;
 import com.bytedance.scene.utlity.ViewRefUtility;
 import com.bytedance.scene.view.SceneContextThemeWrapper;
@@ -241,7 +239,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
     public final Bundle requireArguments() {
         Bundle arguments = getArguments();
         if (arguments == null) {
-            throw new IllegalStateException("Scene " + this + " does not have any arguments.");
+            throw new IllegalStateException("Scene " + this.toCanonicalString() + " does not have any arguments.");
         }
         return arguments;
     }
@@ -275,12 +273,12 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         if (parentScene != null) {
             this.mParentScene = parentScene;
         } else {
-            LoggerManager.getInstance().v(TAG, "This Scene is the root Scene " + this);
+            LoggerManager.getInstance().v(TAG, "This Scene is the root Scene " + this.toCanonicalString());
         }
         mCalled = false;
         onAttach();
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onAttach()");
         }
     }
@@ -314,7 +312,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneCreated(this, savedInstanceState, false);
         onCreate(savedInstanceState);
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onCreate()");
         }
         dispatchOnSceneCreated(this, savedInstanceState, false);
@@ -397,7 +395,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneViewCreated(this, savedInstanceState, false);
         onViewCreated(mView, savedInstanceState);
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onViewCreated()");
         }
         dispatchOnSceneViewCreated(this, savedInstanceState, false);
@@ -417,7 +415,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneActivityCreated(this, savedInstanceState, false);
         onActivityCreated(savedInstanceState);
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onActivityCreated()");
         }
         dispatchOnSceneActivityCreated(this, savedInstanceState, false);
@@ -437,7 +435,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneStarted(this, false);
         onStart();
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onStart()");
         }
         dispatchOnSceneStarted(this, false);
@@ -454,7 +452,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         mCalled = false;
         onViewStateRestored(savedInstanceState);
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onViewStateRestored()");
         }
     }
@@ -466,7 +464,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneResumed(this, false);
         onResume();
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onResume()");
         }
         dispatchOnSceneResumed(this, false);
@@ -487,7 +485,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreScenePaused(this, false);
         onPause();
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onPause()");
         }
         dispatchOnScenePaused(this, false);
@@ -500,7 +498,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneSaveInstanceState(this, outState, false);
         onSaveInstanceState(outState);
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onSaveInstanceState()");
         }
         if (mSavedStateRegistryController != null) {
@@ -520,7 +518,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneStopped(this, false);
         onStop();
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onStop()");
         }
         dispatchOnSceneStopped(this, false);
@@ -545,7 +543,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneViewDestroyed(this, false);
         onDestroyView();
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onDestroyView()");
         }
         dispatchOnSceneViewDestroyed(this, false);
@@ -565,7 +563,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         dispatchOnPreSceneDestroyed(this, false);
         onDestroy();
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onDestroy()");
         }
         dispatchOnSceneDestroyed(this, false);
@@ -586,7 +584,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         mCalled = false;
         onDetach();
         if (!mCalled) {
-            throw new SuperNotCalledException("Scene " + this
+            throw new SuperNotCalledException("Scene " + this.toCanonicalString()
                     + " did not call through to super.onDetach()");
         }
 
@@ -741,7 +739,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
     public final Context requireSceneContext() {
         Context sceneContext = getSceneContext();
         if (sceneContext == null) {
-            throw new IllegalStateException("Scene " + this + " not attached to an activity.");
+            throw new IllegalStateException("Scene " + this.toCanonicalString() + " not attached to an activity.");
         }
         return sceneContext;
     }
@@ -801,7 +799,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
     public final Activity requireActivity() {
         Activity activity = getActivity();
         if (activity == null) {
-            throw new IllegalStateException("Scene " + this + " not attached to an activity.");
+            throw new IllegalStateException("Scene " + this.toCanonicalString() + " not attached to an activity.");
         }
         return activity;
     }
@@ -810,7 +808,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
     public final Context requireApplicationContext() {
         Context context = getApplicationContext();
         if (context == null) {
-            throw new IllegalStateException("Scene " + this + " not attached to a context.");
+            throw new IllegalStateException("Scene " + this.toCanonicalString() + " not attached to a context.");
         }
         return context;
     }
@@ -903,9 +901,9 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         if (parentScene == null) {
             Context context = getApplicationContext();
             if (context == null) {
-                throw new IllegalStateException("Scene " + this + " is not attached to any Scene or host");
+                throw new IllegalStateException("Scene " + this.toCanonicalString() + " is not attached to any Scene or host");
             } else {
-                throw new IllegalStateException("Scene " + this + " is root Scene, not a child Scene");
+                throw new IllegalStateException("Scene " + this.toCanonicalString() + " is root Scene, not a child Scene");
             }
         }
         return parentScene;
@@ -1569,6 +1567,14 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
         Utility.buildShortClassTag(this, sb);
+        return sb.toString();
+    }
+
+    /** @hide */
+    @RestrictTo(LIBRARY_GROUP)
+    private String toCanonicalString() {
+        StringBuilder sb = new StringBuilder(128);
+        Utility.buildCanonicalClassTag(this, sb);
         return sb.toString();
     }
 

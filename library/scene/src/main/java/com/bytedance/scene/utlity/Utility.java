@@ -34,7 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
-import androidx.lifecycle.Lifecycle;
+
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.SceneParent;
 
@@ -206,6 +206,21 @@ public class Utility {
                 }
             }
             out.append(simpleName);
+            out.append('{');
+            out.append(Integer.toHexString(System.identityHashCode(cls)));
+            out.append('}');
+        }
+    }
+
+    public static void buildCanonicalClassTag(Object cls, StringBuilder out) {
+        if (cls == null) {
+            out.append("null");
+        } else {
+            String name = cls.getClass().getCanonicalName();
+            if (name == null || name.length() <= 0) {
+                name = cls.getClass().getName();
+            }
+            out.append(name);
             out.append('{');
             out.append(Integer.toHexString(System.identityHashCode(cls)));
             out.append('}');
