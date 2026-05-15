@@ -64,7 +64,6 @@ import com.bytedance.scene.navigation.reuse.IReuseScene;
 import com.bytedance.scene.utlity.Action1;
 import com.bytedance.scene.utlity.AnimatorUtility;
 import com.bytedance.scene.utlity.CancellationSignalList;
-import com.bytedance.scene.utlity.ConfigurationUtility;
 import com.bytedance.scene.utlity.NonNullPair;
 import com.bytedance.scene.utlity.Predicate;
 import com.bytedance.scene.utlity.SceneInstanceUtility;
@@ -1797,7 +1796,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
         Record record = this.mBackStackList.getCurrentRecord();
         Scene scene = record.mScene;
 
-        dispatchOnConfigurationChangedToRecordInternal(record, scene, newConfig, mConfigurationChangesAllowList, new Action1<Scene>() {
+        OnWindowFocusChangedScheduler.dispatchOnConfigurationChangedToRecordInternal(record, scene, newConfig, mConfigurationChangesAllowList, new Action1<Scene>() {
             @Override
             public void execute(Scene value) {
                 if (mNavigationScene.mNavigationSceneOptions.isRecreateSceneOnNextLoopAfterConfigurationChanged()) {
@@ -1842,7 +1841,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
             return false;
         }
         LoggerManager.getInstance().i(TAG, "PopOperation dispatch onConfigurationChanged start");
-        boolean result = dispatchOnConfigurationChangedToRecordInternal(record, scene, newConfig, mConfigurationChangesAllowList, new Action1<Scene>() {
+        boolean result = OnWindowFocusChangedScheduler.dispatchOnConfigurationChangedToRecordInternal(record, scene, newConfig, mConfigurationChangesAllowList, new Action1<Scene>() {
             @Override
             public void execute(Scene value) {
                 executeOperationSafely(new RecreateOperation(value, SceneStateSaveReason.CONFIGURATION_CHANGED), null);
@@ -1850,69 +1849,6 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
         });
         LoggerManager.getInstance().i(TAG, "PopOperation dispatch onConfigurationChanged finish");
         return result;
-    }
-
-    //make sure Scene has invoked onCreateView, then dispatch onConfigurationChanged
-    private static boolean dispatchOnConfigurationChangedToRecordInternal(@NonNull Record record, @NonNull Scene scene, @NonNull Configuration newConfig, int configurationChangesAllowList, @NonNull Action1<Scene> recreateAction) {
-        if (scene.getView() == null) {
-            return false;
-        }
-        ActivityCompatibleInfoCollector.Holder holder = ActivityCompatibleInfoCollector.getHolder(scene);
-        if (holder == null) {
-            //skip, default behavior, nothing will happen
-            return false;
-        }
-        Integer configChanges = holder.configChanges;
-        if (holder.configChanges == null) {
-            //skip, default behavior, nothing will happen
-            return false;
-        }
-        if (newConfig.equals(record.mConfiguration)) {
-            return false;
-        }
-        if (record.mConfiguration != null) {
-            Configuration sceneConfiguration = record.mConfiguration;
-            int diff = sceneConfiguration.diff(newConfig);
-            LoggerManager.getInstance().i(TAG, "Configuration has been changed, raw diff " + diff);
-
-            //remove private diff properties
-            diff = ConfigurationUtility.removePrivateDiff(diff);
-            if (configurationChangesAllowList != 0) {
-                diff = (diff & configurationChangesAllowList);
-                LoggerManager.getInstance().i(TAG, "clean diff not include in configurationChangesAllowList, result diff " + diff);
-            }
-
-            String diffString = ConfigurationUtility.configurationDiffToString(diff);
-            LoggerManager.getInstance().i(TAG, "Configuration has been changed, diff " + diffString);
-
-            if ((diff & configChanges) != 0) {
-                LoggerManager.getInstance().i(TAG, "Configuration has been changed, Scene has suitable configChanges, so dispatch onConfigurationChanged to " + scene.toString());
-                if (scene instanceof ActivityCompatibleBehavior) {
-                    ((ActivityCompatibleBehavior) scene).onConfigurationChanged(newConfig);
-                    record.saveActivityCompatibleInfo(newConfig);
-                    return false;
-                } else {
-                    throw new SceneInternalException("Impossible, Scene don't implement ActivityCompatibleBehavior but have configChanges " + scene.toString());
-                }
-            } else {
-                if (TextUtils.isEmpty(diffString)) {
-                    LoggerManager.getInstance().i(TAG, "Configuration has been changed, skip because unknown diff " + diff);
-                    if (scene instanceof ActivityCompatibleBehavior) {
-                        ((ActivityCompatibleBehavior) scene).onConfigurationChanged(newConfig);
-                        record.saveActivityCompatibleInfo(newConfig);
-                        return false;
-                    } else {
-                        throw new SceneInternalException("Impossible, Scene don't implement ActivityCompatibleBehavior but have configChanges " + scene.toString());
-                    }
-                } else {
-                    LoggerManager.getInstance().i(TAG, "Configuration has been changed, recreate " + scene.toString());
-                }
-            }
-        } else {
-            LoggerManager.getInstance().i(TAG, "Scene previous Configuration not found, recreate " + scene.toString());
-        }
-        recreateAction.execute(scene);
-        return true;
     }
 
     private void dispatchWindowFocusToTargetScene(boolean hasFocus) {
