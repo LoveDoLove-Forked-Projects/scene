@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by JiangQi on 9/2/18.
  */
-public class SharedElementSceneTransitionExecutor extends NavigationAnimationExecutor {
+public class SharedElementSceneTransitionExecutor2 extends NavigationAnimationExecutor {
     public static enum TranslucentPolicy {
         THROW_ERROR, USE_FALLBACK, CONTINUE
     }
@@ -58,11 +58,11 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
     protected int mAnimationDuration = -1;
     private final TranslucentPolicy mTranslucentPolicy;
 
-    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
-                                                @Nullable SceneVisibilityTransition otherTransition,
-                                                @NonNull NavigationAnimationExecutor fallbackAnimationExecutor,
-                                                @NonNull SharedElementNotFoundPolicy sharedElementNotFoundPolicy,
-                                                TranslucentPolicy translucentPolicy) {
+    public SharedElementSceneTransitionExecutor2(@NonNull Map<String, SceneTransition> sharedElementTransition,
+                                                 @Nullable SceneVisibilityTransition otherTransition,
+                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor,
+                                                 @NonNull SharedElementNotFoundPolicy sharedElementNotFoundPolicy,
+                                                 TranslucentPolicy translucentPolicy) {
         this.mSharedElementTransition = sharedElementTransition;
         this.mOtherTransition = otherTransition;
         this.mSharedElementNotFoundPolicy = sharedElementNotFoundPolicy;
@@ -70,20 +70,20 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
         this.mTranslucentPolicy = translucentPolicy;
     }
 
-    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
-                                                @Nullable SceneVisibilityTransition otherTransition,
-                                                @NonNull NavigationAnimationExecutor fallbackAnimationExecutor,
-                                                @NonNull SharedElementNotFoundPolicy sharedElementNotFoundPolicy) {
+    public SharedElementSceneTransitionExecutor2(@NonNull Map<String, SceneTransition> sharedElementTransition,
+                                                 @Nullable SceneVisibilityTransition otherTransition,
+                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor,
+                                                 @NonNull SharedElementNotFoundPolicy sharedElementNotFoundPolicy) {
         this(sharedElementTransition, otherTransition, fallbackAnimationExecutor, sharedElementNotFoundPolicy, TranslucentPolicy.THROW_ERROR);
     }
 
-    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
-                                                @Nullable SceneVisibilityTransition otherTransition,
-                                                @NonNull NavigationAnimationExecutor fallbackAnimationExecutor) {
+    public SharedElementSceneTransitionExecutor2(@NonNull Map<String, SceneTransition> sharedElementTransition,
+                                                 @Nullable SceneVisibilityTransition otherTransition,
+                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor) {
         this(sharedElementTransition, otherTransition, fallbackAnimationExecutor, SharedElementNotFoundPolicy.FALLBACK);
     }
 
-    public SharedElementSceneTransitionExecutor(Map<String, SceneTransition> sharedElementTransition, SceneVisibilityTransition otherTransition) {
+    public SharedElementSceneTransitionExecutor2(Map<String, SceneTransition> sharedElementTransition, SceneVisibilityTransition otherTransition) {
         this(sharedElementTransition, otherTransition, new Android8DefaultSceneAnimatorExecutor());
     }
 

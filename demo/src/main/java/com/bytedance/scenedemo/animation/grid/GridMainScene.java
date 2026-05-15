@@ -31,7 +31,7 @@ import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
 import androidx.core.view.ViewCompat;
 
-import com.bytedance.scene.animation.SharedElementSceneTransitionExecutor;
+import com.bytedance.scene.animation.SharedElementSceneTransitionExecutor2;
 import com.bytedance.scene.animation.interaction.scenetransition.AutoSceneTransition;
 import com.bytedance.scene.animation.interaction.scenetransition.SceneTransition;
 import com.bytedance.scene.animation.interaction.scenetransition.visiblity.Fade;
@@ -75,7 +75,7 @@ public class GridMainScene extends AppCompatScene {
             ArrayMap<String, SceneTransition> map = new ArrayMap<>();
             map.put(GridDetailScene.VIEW_NAME_HEADER_IMAGE + item.getId(), new AutoSceneTransition());
             map.put(GridDetailScene.VIEW_NAME_HEADER_TITLE + item.getId(), new AutoSceneTransition());
-            SharedElementSceneTransitionExecutor sharedElementSceneTransitionExecutor = new SharedElementSceneTransitionExecutor(map, new Fade());
+            SharedElementSceneTransitionExecutor2 sharedElementSceneTransitionExecutor = new SharedElementSceneTransitionExecutor2(map, new Fade());
             NavigationSceneExtensionsKt.requireNavigationScene(GridMainScene.this)
                     .push(new GridDetailScene(item), new PushOptions.Builder().setAnimation(sharedElementSceneTransitionExecutor).build());
         }

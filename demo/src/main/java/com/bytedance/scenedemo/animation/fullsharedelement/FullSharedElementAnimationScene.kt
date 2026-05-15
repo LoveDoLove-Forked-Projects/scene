@@ -7,10 +7,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.collection.ArrayMap
 import com.bytedance.scenedemo.R
-import com.bytedance.scene.animation.SharedElementSceneTransitionExecutor
+import com.bytedance.scene.animation.SharedElementSceneTransitionExecutor2
 import com.bytedance.scene.animation.interaction.scenetransition.*
 import com.bytedance.scene.animation.interaction.scenetransition.visiblity.Slide
-import com.bytedance.scenedemo.animation.fullsharedelement.FullSharedElementAnimationScene1
 import com.bytedance.scene.interfaces.PushOptions
 import com.bytedance.scene.ktx.requireNavigationScene
 
@@ -34,7 +33,8 @@ class FullSharedElementAnimationScene : GroupScene() {
         map["shared_element_text_no_size_change"] =
             AutoSceneTransition().addSceneTransition(BackgroundRecolor()).addSceneTransition(TextRecolor())
         //        map.put("shared_element_text_no_size_change", new AutoSceneTransition());
-        val sharedElementSceneTransitionExecutor = SharedElementSceneTransitionExecutor(map, Slide())
+        val sharedElementSceneTransitionExecutor =
+            SharedElementSceneTransitionExecutor2(map, Slide())
         findViewById<View>(R.id.haha)?.setOnClickListener {
             requireNavigationScene().push(
                 FullSharedElementAnimationScene1(),
