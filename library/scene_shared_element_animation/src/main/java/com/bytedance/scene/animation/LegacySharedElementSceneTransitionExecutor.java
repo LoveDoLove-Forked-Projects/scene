@@ -17,8 +17,6 @@ package com.bytedance.scene.animation;
 
 import android.annotation.TargetApi;
 import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -31,20 +29,16 @@ import com.bytedance.scene.animation.interaction.scenetransition.visiblity.Scene
 import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.utlity.CancellationSignal;
 import com.bytedance.scene.utlity.CancellationSignalList;
+import com.bytedance.scene.utlity.Utility;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by JiangQi on 9/2/18.
  */
-public class SharedElementSceneTransitionExecutor extends NavigationAnimationExecutor {
-    public static enum TranslucentPolicy {
-        THROW_ERROR, USE_FALLBACK, CONTINUE
-    }
-
-    private static final String TAG = "SharedElementSceneTransitionExecutor";
-    private static final Handler sHandler = new Handler(Looper.getMainLooper());
+@Deprecated
+public class LegacySharedElementSceneTransitionExecutor extends NavigationAnimationExecutor {
+    private static final String TAG = "LegacySharedElementSceneTransitionExecutor";
     @NonNull
     private final Map<String, SceneTransition> mSharedElementTransition;
     @Nullable
@@ -56,34 +50,34 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
     private boolean mDelayEnterTransitionExecute = false;
     private Runnable mEnterTransitionRunnable = null;
     protected int mAnimationDuration = -1;
-    private final TranslucentPolicy mTranslucentPolicy;
+    private final boolean mUseFallbackIfTranslucent;
 
-    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
+    public LegacySharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
                                                 @Nullable SceneVisibilityTransition otherTransition,
                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor,
                                                 @NonNull SharedElementNotFoundPolicy sharedElementNotFoundPolicy,
-                                                TranslucentPolicy translucentPolicy) {
+                                                boolean useFallbackIfTranslucent) {
         this.mSharedElementTransition = sharedElementTransition;
         this.mOtherTransition = otherTransition;
         this.mSharedElementNotFoundPolicy = sharedElementNotFoundPolicy;
         this.mFallbackAnimationExecutor = fallbackAnimationExecutor;
-        this.mTranslucentPolicy = translucentPolicy;
+        this.mUseFallbackIfTranslucent = useFallbackIfTranslucent;
     }
 
-    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
+    public LegacySharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
                                                 @Nullable SceneVisibilityTransition otherTransition,
                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor,
                                                 @NonNull SharedElementNotFoundPolicy sharedElementNotFoundPolicy) {
-        this(sharedElementTransition, otherTransition, fallbackAnimationExecutor, sharedElementNotFoundPolicy, TranslucentPolicy.THROW_ERROR);
+        this(sharedElementTransition, otherTransition, fallbackAnimationExecutor, sharedElementNotFoundPolicy, false);
     }
 
-    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
+    public LegacySharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
                                                 @Nullable SceneVisibilityTransition otherTransition,
                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor) {
         this(sharedElementTransition, otherTransition, fallbackAnimationExecutor, SharedElementNotFoundPolicy.FALLBACK);
     }
 
-    public SharedElementSceneTransitionExecutor(Map<String, SceneTransition> sharedElementTransition, SceneVisibilityTransition otherTransition) {
+    public LegacySharedElementSceneTransitionExecutor(Map<String, SceneTransition> sharedElementTransition, SceneVisibilityTransition otherTransition) {
         this(sharedElementTransition, otherTransition, new Android8DefaultSceneAnimatorExecutor());
     }
 
@@ -97,73 +91,41 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
     }
 
     public void postponeEnterTransition() {
-        this.postponeEnterTransition(TimeUnit.SECONDS.toMillis(5));
-    }
-
-    public void postponeEnterTransition(long timeOutMillis) {
-        if (this.mDelayEnterTransitionExecute) {
-            return;
-        }
-        LoggerManager.getInstance().i(TAG, "invoke postponeEnterTransition to delay animation");
         this.mDelayEnterTransitionExecute = true;
-        sHandler.postDelayed(this.TIME_OUT_CALLBACK, timeOutMillis);
     }
 
     public void startPostponedEnterTransition() {
-        this.startPostponedEnterTransitionInternal(true);
-    }
-
-    private void startPostponedEnterTransitionInternal(boolean removeTimeOutCallback) {
-        LoggerManager.getInstance().i(TAG, "invoke startPostponedEnterTransition to start pending animation");
         if (this.mEnterTransitionRunnable != null) {
             this.mEnterTransitionRunnable.run();
             this.mEnterTransitionRunnable = null;
         }
         this.mDelayEnterTransitionExecute = false;
-        if (removeTimeOutCallback) {
-            sHandler.removeCallbacks(this.TIME_OUT_CALLBACK);
-        }
     }
 
     public void setAnimationDuration(int animationDuration) {
         this.mAnimationDuration = animationDuration;
     }
 
-    private final Runnable TIME_OUT_CALLBACK = () -> {
-        if (mEnterTransitionRunnable != null) {
-            LoggerManager.getInstance().i(TAG, "postponeEnterTransition reach time out");
-            startPostponedEnterTransitionInternal(false);
-        }
-    };
-
     @Override
     public final void executePushChangeCancelable(@NonNull final AnimationInfo fromInfo, @NonNull final AnimationInfo toInfo, @NonNull final Runnable endAction, @NonNull final CancellationSignal cancellationSignal) {
         boolean useFallbackAnimation = false;
         if (fromInfo.mIsTranslucent) {
             String exceptionMessage = "SharedElement push animation don't support translucent source scene: " + fromInfo.mSceneClass + ", destination scene: " + toInfo.mSceneClass;
-            switch (this.mTranslucentPolicy) {
-                case CONTINUE:
-                    break;
-                case THROW_ERROR:
-                    throw new IllegalArgumentException(exceptionMessage);
-                case USE_FALLBACK:
-                    LoggerManager.getInstance().e(TAG, exceptionMessage);
-                    useFallbackAnimation = true;
-                    break;
+            if (this.mUseFallbackIfTranslucent) {
+                LoggerManager.getInstance().e(TAG, exceptionMessage);
+                useFallbackAnimation = true;
+            } else {
+                throw new IllegalArgumentException(exceptionMessage);
             }
         }
 
         if (toInfo.mIsTranslucent) {
             String exceptionMessage = "SharedElement push animation don't support translucent destination scene: " + toInfo.mSceneClass + ", source scene: " + fromInfo.mSceneClass;
-            switch (this.mTranslucentPolicy) {
-                case CONTINUE:
-                    break;
-                case THROW_ERROR:
-                    throw new IllegalArgumentException(exceptionMessage);
-                case USE_FALLBACK:
-                    LoggerManager.getInstance().e(TAG, exceptionMessage);
-                    useFallbackAnimation = true;
-                    break;
+            if (this.mUseFallbackIfTranslucent) {
+                LoggerManager.getInstance().e(TAG, exceptionMessage);
+                useFallbackAnimation = true;
+            } else {
+                throw new IllegalArgumentException(exceptionMessage);
             }
         }
 
@@ -175,6 +137,7 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
 
         executePushChangeV21(fromInfo, toInfo, endAction, cancellationSignal);
     }
+
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void executePushChangeV21(@NonNull final AnimationInfo fromInfo, @NonNull final AnimationInfo
@@ -205,9 +168,7 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
                     sharedElementViewTransitionExecutor.executePushChange(fromView, toView, new Runnable() {
                         @Override
                         public void run() {
-                            if (!toInfo.mIsTranslucent) {
-                                fromView.setVisibility(View.GONE);
-                            }
+                            fromView.setVisibility(View.GONE);
                             endAction.run();
                         }
                     }, cancellationSignalListAdapter.getChildCancellationSignal(), mSharedElementNotFoundPolicy, fallbackAction);
@@ -218,9 +179,7 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
                 public void onCancel() {
                     mEnterTransitionRunnable = null;
                     toView.setVisibility(View.VISIBLE);
-                    if (!toInfo.mIsTranslucent) {
-                        fromView.setVisibility(View.GONE);
-                    }
+                    fromView.setVisibility(View.GONE);
                     cancellationSignalListAdapter.cancel();
                 }
             });
@@ -228,9 +187,7 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
             sharedElementViewTransitionExecutor.executePushChange(fromView, toView, new Runnable() {
                 @Override
                 public void run() {
-                    if (!toInfo.mIsTranslucent) {
-                        fromView.setVisibility(View.GONE);
-                    }
+                    fromView.setVisibility(View.GONE);
                     endAction.run();
                 }
             }, cancellationSignal, mSharedElementNotFoundPolicy, fallbackAction);
@@ -241,36 +198,15 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
     public final void executePopChangeCancelable(@NonNull AnimationInfo
                                                          fromInfo, @NonNull AnimationInfo toInfo, @NonNull final Runnable endAction,
                                                  @NonNull CancellationSignal cancellationSignal) {
-        boolean useFallbackAnimation = false;
         if (fromInfo.mIsTranslucent) {
-            String exceptionMessage = "SharedElement pop animation don't support translucent source scene: " + fromInfo.mSceneClass + ", destination scene: " + toInfo.mSceneClass;
-            switch (this.mTranslucentPolicy) {
-                case CONTINUE:
-                    break;
-                case THROW_ERROR:
-                    throw new IllegalArgumentException(exceptionMessage);
-                case USE_FALLBACK:
-                    LoggerManager.getInstance().e(TAG, exceptionMessage);
-                    useFallbackAnimation = true;
-                    break;
-            }
+            throw new IllegalArgumentException("SharedElement pop animation don't support translucent source scene: " + fromInfo.mSceneClass + ", destination scene: " + toInfo.mSceneClass);
         }
 
         if (toInfo.mIsTranslucent) {
-            String exceptionMessage = "SharedElement pop animation don't support translucent destination scene: " + toInfo.mSceneClass + ", source scene: " + fromInfo.mSceneClass;
-            switch (this.mTranslucentPolicy) {
-                case CONTINUE:
-                    break;
-                case THROW_ERROR:
-                    throw new IllegalArgumentException(exceptionMessage);
-                case USE_FALLBACK:
-                    LoggerManager.getInstance().e(TAG, exceptionMessage);
-                    useFallbackAnimation = true;
-                    break;
-            }
+            throw new IllegalArgumentException("SharedElement pop animation don't support translucent destination scene: " + toInfo.mSceneClass + ", source scene: " + fromInfo.mSceneClass);
         }
 
-        if (useFallbackAnimation || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             this.mFallbackAnimationExecutor.setAnimationViewGroup(mAnimationViewGroup);
             this.mFallbackAnimationExecutor.executePopChangeCancelable(fromInfo, toInfo, endAction, cancellationSignal);
             return;
@@ -285,14 +221,7 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
         final View fromView = fromInfo.mSceneView;
         final View toView = toInfo.mSceneView;
 
-        if (!mDisableRemoveView) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                mAnimationViewGroup.getOverlay().add(fromView);
-            } else {
-                mAnimationViewGroup.addView(fromView);
-            }
-        }
-
+        mAnimationViewGroup.addView(fromView);
         fromView.setVisibility(View.VISIBLE);
 
         final Runnable fallbackAction = new Runnable() {
@@ -311,15 +240,7 @@ public class SharedElementSceneTransitionExecutor extends NavigationAnimationExe
             @Override
             public void run() {
                 fromView.setVisibility(View.GONE);
-
-                if (!mDisableRemoveView) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                        mAnimationViewGroup.getOverlay().remove(fromView);
-                    } else {
-                        mAnimationViewGroup.removeView(fromView);
-                    }
-                }
-
+                Utility.removeFromParentView(fromView);
                 endAction.run();
             }
         }, cancellationSignal, mSharedElementNotFoundPolicy, fallbackAction);
