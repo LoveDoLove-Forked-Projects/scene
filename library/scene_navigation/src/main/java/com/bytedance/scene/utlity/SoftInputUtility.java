@@ -32,7 +32,7 @@ public class SoftInputUtility {
         if (view == null) {
             return false;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SceneGlobalConfig.useWindowInsetsToDetectIMEStatus) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SceneGlobalConfig.forceUseWindowInsetsToDetectIMEStatus) {
             View rootView = view.getRootView();
             if (rootView != null) {
                 WindowInsets windowInsets = rootView.getRootWindowInsets();

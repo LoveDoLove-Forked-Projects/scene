@@ -12,5 +12,5 @@ public class SceneGlobalConfig {
     public static volatile boolean useStrictPublishResultCallbackEnabled = false;
     public static volatile boolean checkExceptionBeforeNavigate = false;
     public static volatile boolean onlyRestoreNonSystemBarAfterAnimation = false;
-    public static volatile boolean useWindowInsetsToDetectIMEStatus = false;
+    public static volatile boolean forceUseWindowInsetsToDetectIMEStatus = false;
 }
