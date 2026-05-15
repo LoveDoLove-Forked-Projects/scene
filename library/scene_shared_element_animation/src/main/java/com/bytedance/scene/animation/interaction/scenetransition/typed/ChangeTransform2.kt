@@ -31,25 +31,55 @@ class ChangeTransformValueCaptor(private val scaleToFit: Matrix.ScaleToFit = Mat
             return Matrix()
         }
 
-        val animateViewRect = getRectByView(animateView)
-        val simulateTargetViewRect = getRectByView(targetView)
+        // local->window
+        val currentAnimateViewMatrixInWindowCoordinateSystem = Matrix().apply {
+            SceneViewCompatUtils.transformMatrixToGlobal(
+                animateView,
+                this,
+            )
+        }
 
-        val matrix = Matrix()
-        matrix.setRectToRect(animateViewRect, simulateTargetViewRect, scaleToFit)
+        // window->local
+        val invertCurrentAnimateViewMatrixInWindowCoordinateSystem =
+            Matrix().apply { require(currentAnimateViewMatrixInWindowCoordinateSystem.invert(this)) }
 
-        return matrix
+        val targetViewCurrentRectInWindowCoordinateSystem =
+            getRectByViewInWindowCoordinateSystem(targetView)
+        //update targetViewCurrentRect to View Coordinate System
+        invertCurrentAnimateViewMatrixInWindowCoordinateSystem.mapRect(
+            targetViewCurrentRectInWindowCoordinateSystem,
+        )
+
+        val animateViewOriginRectInWindowCoordinateSystem =
+            RectF(0.0f, 0.0f, animateView.width.toFloat(), animateView.height.toFloat())
+        //update animateViewOriginRectInWindowCoordinateSystem to View Coordinate System
+        invertCurrentAnimateViewMatrixInWindowCoordinateSystem.mapRect(
+            animateViewOriginRectInWindowCoordinateSystem,
+        )
+
+        val matrixInViewCoordinateSystem = Matrix().apply {
+            setRectToRect(
+                animateViewOriginRectInWindowCoordinateSystem,
+                targetViewCurrentRectInWindowCoordinateSystem,
+                scaleToFit,
+            )
+        }
+
+        val resultMatrix = Matrix(invertCurrentAnimateViewMatrixInWindowCoordinateSystem).apply {
+            postConcat(matrixInViewCoordinateSystem)
+        }
+        return resultMatrix
     }
 
-    private fun getRectByView(view: View): RectF {
-        val loc = IntArray(2)
-        view.getLocationOnScreen(loc)
-        val animateViewRect = RectF(
-            loc[0].toFloat(),
-            loc[1].toFloat(),
-            loc[0].toFloat() + view.width,
-            loc[1].toFloat() + view.height
-        )
-        return animateViewRect
+    private fun getRectByViewInWindowCoordinateSystem(view: View): RectF {
+        val width = view.width
+        val height = view.height
+        val local = RectF(0f, 0f, width.toFloat(), height.toFloat())
+
+        val toWindow = Matrix()
+        SceneViewCompatUtils.transformMatrixToGlobal(view, toWindow)
+        toWindow.mapRect(local)
+        return local
     }
 }
 
@@ -64,6 +94,10 @@ class ChangeTransformValueApplier : AnimationValueApplier<View, Matrix> {
     }
 }
 
-class ChangeTransform2(timeInterpolator: TimeInterpolator?) : TypedSceneTransition<View, Matrix>(
-    ChangeTransformValueCaptor(), MatrixEvaluator(), ChangeTransformValueApplier(), timeInterpolator
-)
+class ChangeTransform2(timeInterpolator: TimeInterpolator? = null) :
+    TypedSceneTransition<View, Matrix>(
+        ChangeTransformValueCaptor(),
+        MatrixEvaluator(),
+        ChangeTransformValueApplier(),
+        timeInterpolator,
+    )
