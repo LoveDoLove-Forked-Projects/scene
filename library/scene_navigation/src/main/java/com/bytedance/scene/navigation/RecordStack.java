@@ -40,17 +40,27 @@ class RecordStack {
 
     public void push(Record record) {
         this.mBackStackList.add(record);
-        LoggerManager.getInstance().i(TAG, "add new record to RecordStack, current stack size " + this.mBackStackList.size());
+        Scene scene = record.mScene;
+        if (scene != null) {
+            LoggerManager.getInstance().i(TAG, "add new record to RecordStack, current stack size " + this.mBackStackList.size() + " added scene " + scene);
+        } else {
+            LoggerManager.getInstance().i(TAG, "add new record to RecordStack, current stack size " + this.mBackStackList.size());
+        }
     }
 
     public void pop() {
         this.mBackStackList.remove(this.mBackStackList.size() - 1);
-        LoggerManager.getInstance().i(TAG, "remove old record from RecordStack, current stack size " + this.mBackStackList.size());
+        LoggerManager.getInstance().i(TAG, "pop old record from RecordStack, current stack size " + this.mBackStackList.size());
     }
 
     public void remove(Record record) {
         this.mBackStackList.remove(record);
-        LoggerManager.getInstance().i(TAG, "remove old record from RecordStack, current stack size " + this.mBackStackList.size());
+        Scene scene = record.mScene;
+        if (scene != null) {
+            LoggerManager.getInstance().i(TAG, "remove old record from RecordStack, current stack size " + this.mBackStackList.size() + " removed scene " + scene);
+        } else {
+            LoggerManager.getInstance().i(TAG, "remove old record from RecordStack, current stack size " + this.mBackStackList.size());
+        }
     }
 
     public Record getCurrentRecord() {
