@@ -217,6 +217,9 @@ class AnimationOrAnimatorResourceExecutor2 : NavigationAnimationExecutor {
 
             if (!mDisableRemoveView) {
                 mAnimationViewGroup.getOverlay().remove(fromView)
+            } else {
+                fromView.visibility = View.INVISIBLE
+                fromView.clearAnimation()
             }
             endAction.run()
         }
