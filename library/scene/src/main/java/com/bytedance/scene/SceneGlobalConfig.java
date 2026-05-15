@@ -10,7 +10,6 @@ public class SceneGlobalConfig {
     public static volatile boolean sceneLifecycleCallbackObjectCreationOpt = false;
     public static volatile boolean cancelAnimationWhenForceExecutePendingNavigationOperation = false;
     public static volatile boolean useStrictPublishResultCallbackEnabled = false;
-    public static volatile boolean checkExceptionBeforeNavigate = false;
     public static volatile boolean onlyRestoreNonSystemBarAfterAnimation = false;
     public static volatile boolean forceUseWindowInsetsToDetectIMEStatus = false;
     public static volatile boolean allowNonUIThreadCreateSceneLifecycle = false;

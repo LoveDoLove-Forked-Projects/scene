@@ -276,7 +276,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
     }
 
     private void scheduleToNextUIThreadLoop(@NonNull final Operation operation, boolean async, boolean hasAsyncUrgentHint) {
-        if (SceneGlobalConfig.checkExceptionBeforeNavigate && this.mLastException != null) {
+        if (this.mLastException != null) {
             throw new PreviousExceptionMistakenlyForceCaughtException("Cant navigate because previous navigation operation encounter error, last exception ", this.mLastException);
         }
 
