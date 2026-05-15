@@ -160,7 +160,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
 
     @StyleRes
     private int mThemeResource;
-    private FixSceneReuseLifecycleAdapter mLifecycleRegistry;
+    private volatile FixSceneReuseLifecycleAdapter mLifecycleRegistry;
     private SavedStateRegistryController mSavedStateRegistryController;
 
     /**
@@ -259,7 +259,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
     public void dispatchAttachActivity(@NonNull Activity activity) {
         this.mActivity = activity;
         if (this.mLifecycleRegistry == null && isLifecycleAndSavedStateRegistryEnabled()) {
-            this.mLifecycleRegistry = new FixSceneReuseLifecycleAdapter(new LifecycleRegistry(this));
+            initLifecycleIfNeeded();
         }
         // Scene need to reset status when reuse after been destroyed
         if (this.mLifecycleRegistry != null && this.mLifecycleRegistry.getCurrentState() != Lifecycle.State.INITIALIZED) {
@@ -1142,20 +1142,34 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
      * <li>{@link Lifecycle.Event#ON_DESTROY destroyed} before {@link #onDestroyView()}</li>
      * </ol>
      */
-    @MainThread
     @NonNull
     @Override
     public final Lifecycle getLifecycle() {
-        if (this.mLifecycleRegistry == null) {
-            if (!this.isLifecycleAndSavedStateRegistryEnabled()) {
-                throw new IllegalStateException("Scene disable getLifecycle()");
-            } else {
-                //make sure LifecycleRegistry is only created on UI thread
-                ThreadUtility.checkUIThread();
+        if (this.mLifecycleRegistry != null) {
+            return this.mLifecycleRegistry;
+        }
+
+        if (this.isLifecycleAndSavedStateRegistryEnabled()) {
+            return initLifecycleIfNeeded();
+        } else {
+            throw new IllegalStateException("Scene disable getLifecycle()");
+        }
+    }
+
+    private FixSceneReuseLifecycleAdapter initLifecycleIfNeeded() {
+        if (this.mLifecycleRegistry != null) {
+            return this.mLifecycleRegistry;
+        }
+
+        synchronized (this) {
+            if (this.mLifecycleRegistry == null) {
+                if (!this.isLifecycleAndSavedStateRegistryEnabled()) {
+                    throw new SceneInternalException("Scene initLifecycleIfNeeded when isLifecycleAndSavedStateRegistryEnabled false");
+                }
                 this.mLifecycleRegistry = new FixSceneReuseLifecycleAdapter(new LifecycleRegistry(this));
             }
+            return this.mLifecycleRegistry;
         }
-        return this.mLifecycleRegistry;
     }
 
     /**
