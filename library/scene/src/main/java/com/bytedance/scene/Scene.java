@@ -1096,10 +1096,6 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         }
 
         if (this.isLifecycleAndSavedStateRegistryEnabled()) {
-            if (!SceneGlobalConfig.allowNonUIThreadCreateSceneLifecycle) {
-                //make sure LifecycleRegistry is only created on UI thread
-                ThreadUtility.checkUIThread();
-            }
             return initLifecycleIfNeeded();
         } else {
             throw new IllegalStateException("Scene disable getLifecycle()");
