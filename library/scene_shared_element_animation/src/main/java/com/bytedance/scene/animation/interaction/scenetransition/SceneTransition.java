@@ -74,9 +74,16 @@ public abstract class SceneTransition implements Cloneable {
         });
         valueAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationStart(Animator animation) {
+                super.onAnimationStart(animation);
+                SceneTransition.this.onStart(mAnimationView);
+            }
+
+            @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 interactionAnimation.dispatchProgress(1.0f);
+                SceneTransition.this.onFinish(mAnimationView);
             }
         });
         if (this.mInterpolator != null) {
@@ -86,6 +93,14 @@ public abstract class SceneTransition implements Cloneable {
     }
 
     public abstract void finish(boolean push);
+
+    public void onStart(View animationView) {
+
+    }
+
+    public void onFinish(View animationView) {
+
+    }
 
     @Override
     public SceneTransition clone() {
