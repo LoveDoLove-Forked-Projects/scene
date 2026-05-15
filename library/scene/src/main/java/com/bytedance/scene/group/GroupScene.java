@@ -115,11 +115,6 @@ public abstract class GroupScene extends Scene implements SceneParent {
     }
 
     @NonNull
-    GroupSceneManager getGroupSceneManager() {
-        return mGroupSceneManager;
-    }
-
-    @NonNull
     @Override
     public final List<Scene> getSceneList() {
         return this.mGroupSceneManager.getChildSceneList();
