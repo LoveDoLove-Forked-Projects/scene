@@ -57,6 +57,7 @@ public class NavigationMessageQueue {
     private IdleRunnable mIdleRunnable = null;
 
     private int mDelayMessageCount = 0;
+    private Runnable mAnimationBarrier = null;
 
     /**
      * post task at the end of queue
@@ -141,9 +142,51 @@ public class NavigationMessageQueue {
         this.mIdleRunnable.start();
     }
 
+    //All pending(post before and post after) tasks will be suspended forever until removeBarrier
+    public void postBarrier(Runnable barrierForceFinishAction) {
+        LoggerManager.getInstance().i(TAG, "postBarrier submit " + barrierForceFinishAction.toString());
+        ThreadUtility.checkUIThread();
+        if (this.mAnimationBarrier != null) {
+            throw new SceneInternalException("Previous barrier is not cleared");
+        }
+        if (this.mIdleRunnable != null) {
+            throw new SceneInternalException("Previous postAsyncAtHeadIdleDelayed is not finished");
+        }
+        this.mAnimationBarrier = barrierForceFinishAction;
+        this.mDelayMessageCount = this.mPendingTasks.size();
+        this.mHandler.removeCallbacks(this.mSceneNavigationTask);
+    }
+
+    public void removeBarrier(Runnable barrierForceFinishAction) {
+        LoggerManager.getInstance().i(TAG, "removeBarrier submit " + barrierForceFinishAction.toString());
+        ThreadUtility.checkUIThread();
+        if (this.mAnimationBarrier != barrierForceFinishAction) {
+            throw new SceneInternalException("Previous Barrier is not cleared");
+        }
+        if (this.mIdleRunnable != null) {
+            throw new SceneInternalException("Previous mIdleRunnable is not cleared");
+        }
+        this.mAnimationBarrier = null;
+        int curDelayMessageCount = this.mPendingTasks.size();
+        if (curDelayMessageCount > this.mDelayMessageCount) {
+            this.mDelayMessageCount = curDelayMessageCount;
+        } else if (curDelayMessageCount == this.mDelayMessageCount) {
+            //skip
+        } else if (curDelayMessageCount < this.mDelayMessageCount) {
+            throw new SceneInternalException("Impossible");
+        }
+        if (this.mDelayMessageCount > 0) {
+            this.mHandler.post(this.mSceneNavigationTask);
+        }
+    }
+
     private final SceneMainRunnable mSceneNavigationTask = new SceneMainRunnable() {
         @Override
         public void run() {
+            if (mAnimationBarrier != null) {
+                return;
+            }
+
             while (mDelayMessageCount > 0) {
                 mHandler.post(this);
                 mDelayMessageCount--;
@@ -178,6 +221,13 @@ public class NavigationMessageQueue {
 
         try {
             forceExecuteIdleTask();
+
+            if (this.mAnimationBarrier != null) {
+                this.mAnimationBarrier.run();
+                if (this.mAnimationBarrier != null) {
+                    throw new SceneInternalException("Barrier is not cleared");
+                }
+            }
 
             //execute all previous navigation tasks
             while (true) {

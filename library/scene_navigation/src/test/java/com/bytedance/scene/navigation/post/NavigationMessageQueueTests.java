@@ -746,4 +746,549 @@ public class NavigationMessageQueueTests {
 
         Assert.assertEquals("123", log.toString());
     }
+
+    @Test
+    public void testBarrierBlocksExecution() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+        Runnable barrier = new Runnable() {
+            @Override
+            public void run() {
+                log.append("Barrier");
+            }
+        };
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        messageQueue.postBarrier(barrier);
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        // Task should not run because of barrier
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("", log.toString());
+
+        // Even multiple runs
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("", log.toString());
+
+        // Remove barrier, task should resume
+        messageQueue.removeBarrier(barrier);
+        
+        // Now it should run (might need to trigger looper again depending on implementation details, 
+        // but removeBarrier posts the task again)
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("1", log.toString());
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("12", log.toString());
+    }
+
+    @Test(expected = SceneInternalException.class)
+    public void testDoubleBarrierThrows() {
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+        Runnable barrier1 = new Runnable() { @Override public void run() {} };
+        Runnable barrier2 = new Runnable() { @Override public void run() {} };
+
+        messageQueue.postBarrier(barrier1);
+        messageQueue.postBarrier(barrier2);
+    }
+
+    @Test(expected = SceneInternalException.class)
+    public void testRemoveWrongBarrierThrows() {
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+        Runnable barrier1 = new Runnable() { @Override public void run() {} };
+        Runnable barrier2 = new Runnable() { @Override public void run() {} };
+
+        messageQueue.postBarrier(barrier1);
+        messageQueue.removeBarrier(barrier2);
+    }
+
+    @Test
+    public void testMultiplePostUrgentAtHead() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postUrgentAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        messageQueue.postUrgentAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("2", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("21", log.toString());
+    }
+
+    @Test
+    public void testPostUrgentAtHeadVsPostAsyncAtHead() {
+        final StringBuilder log = new StringBuilder();
+        final Handler handler = new Handler(Looper.getMainLooper());
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        // Post a regular handler task
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        // postAsyncAtHead uses regular post, so it goes after the handler task
+        messageQueue.postAsyncAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        // postUrgentAtHead uses postAtFrontOfQueue, so it goes before everything
+        messageQueue.postUrgentAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("3");
+            }
+        });
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("3", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("31", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("312", log.toString());
+    }
+
+    @Test
+    public void testBarrierBlocksNewTasks() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        Runnable barrier = new Runnable() {
+            @Override
+            public void run() {
+                messageQueue.removeBarrier(this);
+            }
+        };
+
+        messageQueue.postBarrier(barrier);
+
+        // Add task after barrier
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("3");
+            }
+        });
+
+        // Nothing should run due to barrier
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("", log.toString());
+
+        // Remove barrier
+        barrier.run();
+
+        // Now all tasks should run
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("1", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("12", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("123", log.toString());
+    }
+
+    @Test
+    public void testPostSyncOnEmptyQueue() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postSync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        Assert.assertEquals("1", log.toString());
+    }
+
+    @Test
+    public void testRemoveNonExistentTask() {
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+        NavigationRunnable runnable = new NavigationRunnable() {
+            @Override
+            public void run() {
+            }
+        };
+
+        boolean removed = messageQueue.remove(runnable);
+        Assert.assertFalse(removed);
+    }
+
+    @Test
+    public void testPostAsyncAtHeadInsidePostAsync() {
+        final StringBuilder log = new StringBuilder();
+        final NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+                messageQueue.postAsyncAtHead(new NavigationRunnable() {
+                    @Override
+                    public void run() {
+                        log.append("3");
+                    }
+                });
+            }
+        });
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("1", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("13", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("132", log.toString());
+    }
+
+    @Test
+    public void testPostUrgentAtHeadDuringBarrier() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        Runnable barrier = new Runnable() {
+            @Override
+            public void run() {
+                messageQueue.removeBarrier(this);
+            }
+        };
+
+        messageQueue.postBarrier(barrier);
+
+        // Post urgent task during barrier
+        messageQueue.postUrgentAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        // Should not run due to barrier
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("", log.toString());
+
+        // Remove barrier
+        barrier.run();
+
+        // Urgent task should run first (at head)
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("2", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("21", log.toString());
+    }
+
+    @Test
+    public void testPostAsyncAtHeadIdleDelayedTimeout() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        TaskStartSignal signal = new TaskStartSignal();
+        signal.start(); // Start immediately
+
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        }, signal, null, 1000L);
+
+        Assert.assertEquals("", log.toString());
+
+        // Advance time past timeout
+        ShadowLooper.idleMainLooper(1100, TimeUnit.MILLISECONDS);
+
+        Assert.assertEquals("1", log.toString());
+    }
+
+    @Test
+    public void testPostUrgentAtHeadWithIdleDelayedTask() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        }, new TaskStartSignal(), null, 5000L);
+
+        messageQueue.postUrgentAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        // Urgent task should force execute idle task first, then run
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("12", log.toString());
+    }
+
+    @Test
+    public void testMixedPostUrgentAndAsyncAtHead() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("3");
+            }
+        });
+
+        messageQueue.postAsyncAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        messageQueue.postUrgentAtHead(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("1", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("12", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("123", log.toString());
+    }
+
+    @Test
+    public void testRemoveDuringPostSyncExecution() {
+        final StringBuilder log = new StringBuilder();
+        final NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        final NavigationRunnable task2 = new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        };
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        messageQueue.postAsync(task2);
+
+        messageQueue.postSync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("3");
+                messageQueue.remove(task2); // This won't do anything as task2 already executed
+            }
+        });
+
+        // postSync should execute task1, task2, then task3
+        Assert.assertEquals("123", log.toString());
+    }
+
+    @Test
+    public void testMultipleRemoveSameTask() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        NavigationRunnable task = new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        };
+
+        messageQueue.postAsync(task);
+
+        boolean removed1 = messageQueue.remove(task);
+        Assert.assertTrue(removed1);
+
+        boolean removed2 = messageQueue.remove(task);
+        Assert.assertFalse(removed2);
+
+        shadowOf(getMainLooper()).idle();
+        Assert.assertEquals("", log.toString());
+    }
+
+    @Test
+    public void testBarrierWithPostSyncForceExecution() {
+        final StringBuilder log = new StringBuilder();
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+            }
+        });
+
+        Runnable barrier = new Runnable() {
+            @Override
+            public void run() {
+                log.append("B");
+                messageQueue.removeBarrier(this);
+            }
+        };
+
+        messageQueue.postBarrier(barrier);
+
+        // postSync should force execute barrier and all pending tasks
+        messageQueue.postSync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        Assert.assertEquals("B12", log.toString());
+    }
+
+    @Test(expected = SceneInternalException.class)
+    public void testPostBarrierWithExistingIdleTask() {
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
+            @Override
+            public void run() {
+            }
+        }, 5000L);
+
+        // Should throw because idle task is not finished
+        messageQueue.postBarrier(new Runnable() {
+            @Override
+            public void run() {
+            }
+        });
+    }
+
+    @Test
+    public void testComplexNestedOperations() {
+        final StringBuilder log = new StringBuilder();
+        final NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("1");
+                messageQueue.postAsyncAtHead(new NavigationRunnable() {
+                    @Override
+                    public void run() {
+                        log.append("3");
+                    }
+                });
+                messageQueue.postAsync(new NavigationRunnable() {
+                    @Override
+                    public void run() {
+                        log.append("4");
+                    }
+                });
+            }
+        });
+
+        messageQueue.postAsync(new NavigationRunnable() {
+            @Override
+            public void run() {
+                log.append("2");
+            }
+        });
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("1", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("13", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("132", log.toString());
+
+        shadowOf(getMainLooper()).runOneTask();
+        Assert.assertEquals("1324", log.toString());
+    }
+
+    @Test
+    public void testHasPendingTasksWithIdleDelayed() {
+        NavigationMessageQueue messageQueue = new NavigationMessageQueue();
+
+        messageQueue.postAsyncAtHeadIdleDelayed(new NavigationRunnable() {
+            @Override
+            public void run() {
+            }
+        }, 5000L);
+
+        Assert.assertTrue(messageQueue.hasPendingTasks());
+
+        messageQueue.forceExecuteIdleTask();
+
+        Assert.assertFalse(messageQueue.hasPendingTasks());
+    }
 }
