@@ -18,7 +18,6 @@ package com.bytedance.scene.utlity;
 import android.content.Context;
 import android.os.Build;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 
@@ -28,11 +27,11 @@ import com.bytedance.scene.SceneGlobalConfig;
  * Created by JiangQi on 8/19/18.
  */
 public class SoftInputUtility {
-    public static boolean hideSoftInputFromWindow(View view) {
+    public static boolean hideSoftInputFromWindow(View view, boolean useWindowsInsetToDetectIMStatus) {
         if (view == null) {
             return false;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SceneGlobalConfig.forceUseWindowInsetsToDetectIMEStatus) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && useWindowsInsetToDetectIMStatus) {
             View rootView = view.getRootView();
             if (rootView != null) {
                 WindowInsets windowInsets = rootView.getRootWindowInsets();
@@ -45,9 +44,5 @@ public class SoftInputUtility {
             }
         }
         return ((InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    public static boolean hideSoftInputFromWindow(Window window) {
-        return hideSoftInputFromWindow(window != null ? window.getDecorView() : null);
     }
 }

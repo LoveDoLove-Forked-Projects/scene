@@ -48,13 +48,14 @@ public class PushOptions {
     private final boolean mUsePostWhenPause;
     private final boolean mUsePostWhenPauseUrgentHint;
     private final boolean mUseIdleWhenStop;
+    private final boolean mUseWindowsInsetToDetectIMStatus;
     private final LaunchMode mLaunchMode;
     private final LaunchModeBehavior mLaunchModeBehavior;
     private final boolean mUseSceneFromReusePool;
     private final ReuseBehavior mReuseBehavior;
     private final boolean mIncreaseMessagePriority;
 
-    private PushOptions(Predicate<Scene> removePredicate, boolean isTranslucent, boolean usePost, boolean usePostWhenPause, boolean usePostWhenPauseUrgentHint, boolean useIdleWhenStop, boolean increaseMessagePriority, PushResultCallback pushResultCallback, NavigationAnimationExecutor navigationAnimationExecutor, LaunchMode launchMode, LaunchModeBehavior launchModeBehavior, boolean useSceneFromReusePool, ReuseBehavior reuseBehavior) {
+    private PushOptions(Predicate<Scene> removePredicate, boolean isTranslucent, boolean usePost, boolean usePostWhenPause, boolean usePostWhenPauseUrgentHint, boolean useIdleWhenStop, boolean increaseMessagePriority, PushResultCallback pushResultCallback, NavigationAnimationExecutor navigationAnimationExecutor, LaunchMode launchMode, LaunchModeBehavior launchModeBehavior, boolean useSceneFromReusePool, ReuseBehavior reuseBehavior, boolean useWindowsInsetToDetectIMStatus) {
         this.mRemovePredicate = removePredicate;
         this.mIsTranslucent = isTranslucent;
         this.mUsePost = usePost;
@@ -68,6 +69,7 @@ public class PushOptions {
         this.mLaunchModeBehavior = launchModeBehavior;
         this.mUseSceneFromReusePool = useSceneFromReusePool;
         this.mReuseBehavior = reuseBehavior;
+        this.mUseWindowsInsetToDetectIMStatus = useWindowsInsetToDetectIMStatus;
     }
 
     public Predicate<Scene> getRemovePredicate() {
@@ -92,6 +94,10 @@ public class PushOptions {
 
     public boolean isUseIdleWhenStop() {
         return this.mUseIdleWhenStop;
+    }
+
+    public boolean isUseWindowsInsetToDetectIMStatus(){
+        return this.mUseWindowsInsetToDetectIMStatus;
     }
 
     public NavigationAnimationExecutor getNavigationAnimationFactory() {
@@ -155,6 +161,7 @@ public class PushOptions {
         private boolean mUsePostWhenPause = false;
         private boolean mUsePostWhenPauseUrgentHint = false;
         private boolean mUseIdleWhenStop = false;
+        private boolean mUseWindowsInsetToDetectIMStatus = false;
         private boolean mIncreaseMessagePriority = false;
         private LaunchMode mLaunchMode;
         private LaunchModeBehavior mLaunchModeBehavior;
@@ -206,6 +213,12 @@ public class PushOptions {
         @NonNull
         public Builder setUseIdleWhenStop(boolean useIdleWhenStop) {
             this.mUseIdleWhenStop = useIdleWhenStop;
+            return this;
+        }
+
+        @NonNull
+        public Builder setUseWindowsInsetToDetectIMStatus(boolean useWindowsInsetToDetectIMStatus) {
+            this.mUseWindowsInsetToDetectIMStatus = useWindowsInsetToDetectIMStatus;
             return this;
         }
 
@@ -266,7 +279,7 @@ public class PushOptions {
 
         @NonNull
         public PushOptions build() {
-            return new PushOptions(this.mRemovePredicate, this.mIsTranslucent, this.mUsePost, this.mUsePostWhenPause, this.mUsePostWhenPauseUrgentHint, this.mUseIdleWhenStop, this.mIncreaseMessagePriority, this.mPushResultCallback, this.mNavigationAnimationExecutor, this.mLaunchMode, this.mLaunchModeBehavior, this.mUseSceneFromReusePool, this.mReuseBehavior);
+            return new PushOptions(this.mRemovePredicate, this.mIsTranslucent, this.mUsePost, this.mUsePostWhenPause, this.mUsePostWhenPauseUrgentHint, this.mUseIdleWhenStop, this.mIncreaseMessagePriority, this.mPushResultCallback, this.mNavigationAnimationExecutor, this.mLaunchMode, this.mLaunchModeBehavior, this.mUseSceneFromReusePool, this.mReuseBehavior, this.mUseWindowsInsetToDetectIMStatus);
         }
     }
 

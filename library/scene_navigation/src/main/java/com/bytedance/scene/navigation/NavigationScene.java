@@ -616,7 +616,7 @@ public final class NavigationScene extends Scene implements NavigationListener, 
             }
         }
 
-        hideSoftInputIfNeeded();
+        hideSoftInputIfNeeded(pushOptions.isUseWindowsInsetToDetectIMStatus());
         mNavigationSceneManager.push(scene, pushOptions);
     }
 
@@ -654,9 +654,12 @@ public final class NavigationScene extends Scene implements NavigationListener, 
     }
 
     private void hideSoftInputIfNeeded() {
+        this.hideSoftInputIfNeeded(false);
+    }
+    private void hideSoftInputIfNeeded(boolean useWindowsInsetToDetectIMStatus) {
         Scene currentScene = mNavigationSceneManager.getCurrentScene();
         if (currentScene != null) {
-            SoftInputUtility.hideSoftInputFromWindow(currentScene.getView());
+            SoftInputUtility.hideSoftInputFromWindow(currentScene.getView(), useWindowsInsetToDetectIMStatus || SceneGlobalConfig.forceUseWindowInsetsToDetectIMEStatus);
         }
     }
 
