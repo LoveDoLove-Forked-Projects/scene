@@ -52,7 +52,7 @@ import java.util.LinkedList;
 public class NavigationMessageQueue {
     private static final String TAG = "NavigationMessageQueue";
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private final LinkedList<NavigationRunnable> mPendingTask = new LinkedList<>();
+    private final LinkedList<NavigationRunnable> mPendingTasks = new LinkedList<>();
     private boolean mIsRunningPostSync = false;
     private IdleRunnable mIdleRunnable = null;
 
@@ -67,7 +67,7 @@ public class NavigationMessageQueue {
         LoggerManager.getInstance().i(TAG, "postAsync submit " + runnable.toString());
         ThreadUtility.checkUIThread();
         this.forceExecuteIdleTask();
-        this.mPendingTask.add(runnable);
+        this.mPendingTasks.add(runnable);
         this.mHandler.post(this.mSceneNavigationTask);
     }
 
@@ -79,7 +79,7 @@ public class NavigationMessageQueue {
     public void postUrgentAtHead(@NonNull final NavigationRunnable runnable) {
         LoggerManager.getInstance().i(TAG, "postUrgentAtHead submit " + runnable.toString());
         this.forceExecuteIdleTask();
-        this.mPendingTask.add(0, runnable);
+        this.mPendingTasks.add(0, runnable);
         this.mHandler.postAtFrontOfQueue(this.mSceneNavigationTask);
     }
 
@@ -91,13 +91,13 @@ public class NavigationMessageQueue {
     public void postAsyncAtHead(@NonNull final NavigationRunnable runnable) {
         LoggerManager.getInstance().i(TAG, "postAsyncAtHead submit " + runnable.toString());
         this.forceExecuteIdleTask();
-        this.mPendingTask.add(0, runnable);
+        this.mPendingTasks.add(0, runnable);
         this.mHandler.post(this.mSceneNavigationTask);
     }
 
     public boolean remove(@NonNull final NavigationRunnable runnable) {
         LoggerManager.getInstance().i(TAG, "remove " + runnable.toString());
-        return this.mPendingTask.remove(runnable);
+        return this.mPendingTasks.remove(runnable);
     }
 
     @VisibleForTesting
@@ -131,12 +131,12 @@ public class NavigationMessageQueue {
             throw new SceneInternalException("mIdleRunnable should be null");
         }
 
-        if (!this.mPendingTask.isEmpty()) {
-            this.mDelayMessageCount = this.mPendingTask.size();
+        if (!this.mPendingTasks.isEmpty()) {
+            this.mDelayMessageCount = this.mPendingTasks.size();
             this.mHandler.removeCallbacks(this.mSceneNavigationTask);
         }
 
-        this.mPendingTask.add(0, runnable);
+        this.mPendingTasks.add(0, runnable);
         this.mIdleRunnable = new IdleRunnable(this.mHandler, this.mSceneNavigationTask, taskStartSignal, cancellationSignal, timeOutMillis);
         this.mIdleRunnable.start();
     }
@@ -149,7 +149,7 @@ public class NavigationMessageQueue {
                 mDelayMessageCount--;
             }
 
-            NavigationRunnable currentTask = NavigationMessageQueue.this.mPendingTask.poll();
+            NavigationRunnable currentTask = NavigationMessageQueue.this.mPendingTasks.poll();
             if (currentTask == null) {
                 LoggerManager.getInstance().i(TAG, "empty return");
                 return;
@@ -181,7 +181,7 @@ public class NavigationMessageQueue {
 
             //execute all previous navigation tasks
             while (true) {
-                NavigationRunnable currentTask = this.mPendingTask.poll();
+                NavigationRunnable currentTask = this.mPendingTasks.poll();
                 if (currentTask == null) {
                     break;
                 }
@@ -204,7 +204,7 @@ public class NavigationMessageQueue {
     }
 
     public boolean hasPendingTasks() {
-        return mPendingTask.size() > 0;
+        return mPendingTasks.size() > 0;
     }
 
     @VisibleForTesting
