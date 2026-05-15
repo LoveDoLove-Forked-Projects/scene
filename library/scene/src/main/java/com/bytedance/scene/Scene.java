@@ -1170,6 +1170,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
                 if (!this.isLifecycleAndSavedStateRegistryEnabled()) {
                     throw new SceneInternalException("Scene initLifecycleIfNeeded when isLifecycleAndSavedStateRegistryEnabled false");
                 }
+                LoggerManager.getInstance().i(TAG, this + " create LifecycleRegistry");
                 this.mLifecycleRegistry = new FixSceneReuseLifecycleAdapter(new LifecycleRegistry(this));
             }
             return this.mLifecycleRegistry;
