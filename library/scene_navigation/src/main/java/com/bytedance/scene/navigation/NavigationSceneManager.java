@@ -502,7 +502,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
             throw new NullPointerException("scene can't be null");
         }
         LoggerManager.getInstance().i(TAG, "recreate " + scene.toString());
-        scheduleToNextUIThreadLoop(new RecreateOperation(scene, reason));
+        scheduleToNextUIThreadLoop(new RecreateOperation(this.mNavigationScene, NavigationSceneManager.this, this.mBackStackList, scene, reason));
     }
 
     public void changeTranslucent(@NonNull final Scene scene, boolean translucent) {
@@ -1404,11 +1404,17 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
         return navigationResultActionHandler;
     }
 
-    private class RecreateOperation implements Operation {
+    private static class RecreateOperation implements Operation {
+        private final NavigationScene mNavigationScene;
+        private final NavigationManagerAbility mNavigationManager;
+        private final RecordStack mBackStackList;
         private final Scene mScene;
         private final int mReason;
 
-        private RecreateOperation(@NonNull Scene scene, int reason) {
+        private RecreateOperation(NavigationScene navigationScene, NavigationManagerAbility navigationManager, RecordStack backStackList, @NonNull Scene scene, int reason) {
+            this.mNavigationScene = navigationScene;
+            this.mNavigationManager = navigationManager;
+            this.mBackStackList = backStackList;
             this.mScene = scene;
             this.mReason = reason;
         }
@@ -1441,7 +1447,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
             this.mScene.dispatchSaveInstanceState(savedInstanceState);
 
             LoggerManager.getInstance().i(TAG, "RecreateOperation current Scene destroy itself, current Scene instance " + mScene.toString());
-            moveState(mNavigationScene, this.mScene, State.NONE, null, false, null);
+            this.mNavigationManager.moveState(mNavigationScene, this.mScene, State.NONE, null, false, null);
 
             Scene newSceneInstance = null;
             if (mBackStackList.isRootScene(this.mScene) && mNavigationScene.mRootSceneComponentFactory != null) {
@@ -1462,7 +1468,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
             record.mScene = newSceneInstance;
 
             LoggerManager.getInstance().i(TAG, "RecreateOperation new created Scene restore from previous data, new Scene instance " + newSceneInstance.toString());
-            moveState(mNavigationScene, newSceneInstance, targetState, savedInstanceState, false, null);
+            this.mNavigationManager.moveState(mNavigationScene, newSceneInstance, targetState, savedInstanceState, false, null);
 
             if (operationEndAction != null) {
                 operationEndAction.run();
@@ -1802,7 +1808,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
                 if (mNavigationScene.mNavigationSceneOptions.isRecreateSceneOnNextLoopAfterConfigurationChanged()) {
                     recreate(value, SceneStateSaveReason.CONFIGURATION_CHANGED);
                 } else {
-                    executeOperationSafely(new RecreateOperation(value, SceneStateSaveReason.CONFIGURATION_CHANGED), null);
+                    executeOperationSafely(new RecreateOperation(mNavigationScene, NavigationSceneManager.this, mBackStackList, value, SceneStateSaveReason.CONFIGURATION_CHANGED), null);
                 }
             }
         });
@@ -1844,7 +1850,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
         boolean result = OnWindowFocusChangedScheduler.dispatchOnConfigurationChangedToRecordInternal(record, scene, newConfig, mConfigurationChangesAllowList, new Action1<Scene>() {
             @Override
             public void execute(Scene value) {
-                executeOperationSafely(new RecreateOperation(value, SceneStateSaveReason.CONFIGURATION_CHANGED), null);
+                executeOperationSafely(new RecreateOperation(mNavigationScene, NavigationSceneManager.this, mBackStackList, value, SceneStateSaveReason.CONFIGURATION_CHANGED), null);
             }
         });
         LoggerManager.getInstance().i(TAG, "PopOperation dispatch onConfigurationChanged finish");
