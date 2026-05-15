@@ -18,6 +18,7 @@ package com.bytedance.scene.navigation.push
 import com.bytedance.scene.State
 import com.bytedance.scene.animation.AnimationInfo
 import com.bytedance.scene.animation.NavigationAnimationExecutor
+import com.bytedance.scene.logger.LoggerManager
 import com.bytedance.scene.navigation.NavigationManagerAbility
 import com.bytedance.scene.navigation.NavigationScene
 import com.bytedance.scene.navigation.Operation
@@ -32,10 +33,12 @@ import com.bytedance.scene.utlity.CancellationSignalList
  * @author jiangqi@bytedance.com
  */
 internal class PushAnimationOperation(private val managerAbility: NavigationManagerAbility, private val previousRecord: Record?) : Operation {
+    private val TAG = "PushAnimationOperation"
     private val navigationScene: NavigationScene = managerAbility.navigationScene
     private val previousSceneView = previousRecord?.mScene?.view
 
     override fun execute(operationEndAction: Runnable) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation")
         val currentRecordList = managerAbility.currentRecordList
         val topRecord = currentRecordList[currentRecordList.size - 1]
 

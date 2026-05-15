@@ -15,6 +15,7 @@
  */
 package com.bytedance.scene.navigation.pop.idle;
 
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.Operation;
 import com.bytedance.scene.navigation.Record;
@@ -27,6 +28,7 @@ import java.util.List;
  * @author jiangqi@bytedance.com
  */
 public class PopDestroyMiddlePageOperationV2 implements Operation {
+    private static final String TAG = "PopDestroyMiddlePageOperationV2";
     private final NavigationManagerAbility mManagerAbility;
     private final List<Record> mDestroyRecordList;
     private final Record mCurrentRecord;
@@ -39,6 +41,7 @@ public class PopDestroyMiddlePageOperationV2 implements Operation {
 
     @Override
     public void execute(final Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         for (final Record record : this.mDestroyRecordList) {
             if (record == mCurrentRecord) {
                 continue;

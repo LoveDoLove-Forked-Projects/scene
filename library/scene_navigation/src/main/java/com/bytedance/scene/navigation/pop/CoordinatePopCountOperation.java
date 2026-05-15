@@ -24,6 +24,7 @@ import com.bytedance.scene.SceneTrace;
 import com.bytedance.scene.animation.NavigationAnimationExecutor;
 import com.bytedance.scene.interfaces.Function;
 import com.bytedance.scene.interfaces.PopOptions;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.SystemBarRestoreFlag;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
@@ -49,6 +50,7 @@ import java.util.List;
  * PopPauseOperation -> PopResumeOperation -> PopDestroyOperation
  */
 public class CoordinatePopCountOperation implements Operation {
+    private static final String TAG = "CoordinatePopCountOperation";
     private final NavigationManagerAbility mManagerAbility;
     private final NavigationMessageQueue mMessageQueue;
     private final NavigationAnimationExecutor mAnimationFactory;
@@ -76,6 +78,7 @@ public class CoordinatePopCountOperation implements Operation {
 
     @Override
     public void execute(final Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         this.mManagerAbility.cancelCurrentRunningAnimation();
 
         if (!this.mManagerAbility.canExecuteNavigationStackOperation()) {

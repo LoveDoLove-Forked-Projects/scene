@@ -23,6 +23,7 @@ import com.bytedance.scene.SceneGlobalConfig;
 import com.bytedance.scene.State;
 import com.bytedance.scene.animation.AnimationInfo;
 import com.bytedance.scene.animation.NavigationAnimationExecutor;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.SystemBarRestoreFlag;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
@@ -40,6 +41,7 @@ import java.util.List;
  * @author jiangqi@bytedance.com
  */
 public class PopAnimationOperationV2 implements Operation {
+    private static final String TAG = "PopAnimationOperationV2";
     private final NavigationManagerAbility mManagerAbility;
     private final NavigationAnimationExecutor mAnimationFactory;
     private final NavigationScene mNavigationScene;
@@ -64,6 +66,7 @@ public class PopAnimationOperationV2 implements Operation {
 
     @Override
     public void execute(final Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         NavigationAnimationExecutor navigationAnimationExecutor = null;
         // If Pop has a specified animation, the animation specified by Pop is preferred.
         if (this.mAnimationFactory != null && this.mAnimationFactory.isSupport(mCurrentRecord.mScene.getClass(), mReturnRecord.mScene.getClass())) {

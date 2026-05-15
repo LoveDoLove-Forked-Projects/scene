@@ -65,6 +65,7 @@ public class NavigationMessageQueue {
      * @param runnable
      */
     public void postAsync(@NonNull final NavigationRunnable runnable) {
+        LoggerManager.getInstance().i(TAG, "postAsync submit " + runnable.toString());
         ThreadUtility.checkUIThread();
         this.forceExecuteIdleTask();
         this.mPendingTask.add(runnable);
@@ -77,6 +78,7 @@ public class NavigationMessageQueue {
      * @param runnable
      */
     public void postUrgentAtHead(@NonNull final NavigationRunnable runnable) {
+        LoggerManager.getInstance().i(TAG, "postUrgentAtHead submit " + runnable.toString());
         this.forceExecuteIdleTask();
         this.mPendingTask.add(0, runnable);
         this.mHandler.postAtFrontOfQueue(this.mSceneNavigationTask);
@@ -88,12 +90,14 @@ public class NavigationMessageQueue {
      * @param runnable
      */
     public void postAsyncAtHead(@NonNull final NavigationRunnable runnable) {
+        LoggerManager.getInstance().i(TAG, "postAsyncAtHead submit " + runnable.toString());
         this.forceExecuteIdleTask();
         this.mPendingTask.add(0, runnable);
         this.mHandler.post(this.mSceneNavigationTask);
     }
 
     public boolean remove(@NonNull final NavigationRunnable runnable) {
+        LoggerManager.getInstance().i(TAG, "remove " + runnable.toString());
         return this.mPendingTask.remove(runnable);
     }
 
@@ -116,6 +120,7 @@ public class NavigationMessageQueue {
     }
 
     public void postAsyncDelayed(@NonNull final NavigationRunnable runnable, @Nullable TaskStartSignal taskStartSignal, @Nullable CancellationSignal cancellationSignal, long timeOutMillis) {
+        LoggerManager.getInstance().i(TAG, "postAsyncDelayed submit " + runnable.toString());
         this.forceExecuteIdleTask();
 
         if (this.mIdleRunnable != null) {
@@ -146,9 +151,9 @@ public class NavigationMessageQueue {
                 return;
             }
 
-            LoggerManager.getInstance().i(TAG, "run loop task start" + currentTask.toString());
+            LoggerManager.getInstance().i(TAG, "mSceneNavigationTask run task start " + currentTask.toString());
             currentTask.run();
-            LoggerManager.getInstance().i(TAG, "run loop task finish " + currentTask.toString());
+            LoggerManager.getInstance().i(TAG, "mSceneNavigationTask run task finish " + currentTask.toString());
         }
     };
 
@@ -158,6 +163,7 @@ public class NavigationMessageQueue {
      * @param runnable
      */
     public void postSync(@NonNull Runnable runnable) {
+        LoggerManager.getInstance().i(TAG, "postSync start");
         ThreadUtility.checkUIThread();
 
         if (this.mIsRunningPostSync) {
@@ -176,20 +182,21 @@ public class NavigationMessageQueue {
                     break;
                 }
 
-                LoggerManager.getInstance().i(TAG, "postSync run loop previous task start " + currentTask.toString());
+                LoggerManager.getInstance().i(TAG, "postSync run previous pending task start " + currentTask.toString());
                 currentTask.run();
-                LoggerManager.getInstance().i(TAG, "postSync run loop previous task finish " + currentTask.toString());
+                LoggerManager.getInstance().i(TAG, "postSync run previous pending task finish " + currentTask.toString());
             }
 
             this.mHandler.removeCallbacks(this.mSceneNavigationTask);
 
             //then execute this task
-            LoggerManager.getInstance().i(TAG, "postSync run loop current task start " + runnable.toString());
+            LoggerManager.getInstance().i(TAG, "postSync run current task start " + runnable.toString());
             runnable.run();
-            LoggerManager.getInstance().i(TAG, "postSync run loop current task finish " + runnable.toString());
+            LoggerManager.getInstance().i(TAG, "postSync run current task finish " + runnable.toString());
         } finally {
             this.mIsRunningPostSync = false;
         }
+        LoggerManager.getInstance().i(TAG, "postSync finish");
     }
 
     public boolean hasPendingTasks() {

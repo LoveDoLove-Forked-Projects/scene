@@ -813,7 +813,7 @@ public final class NavigationScene extends Scene implements NavigationListener, 
         }
 
         if (this.mNavigationSceneOptions.getOptimizedViewLayer()) {
-            LoggerManager.getInstance().v(TAG, "optimizedViewLayer don't support requestDisableTouchEvent");
+            LoggerManager.getInstance().v(TAG, "optimizedViewLayer don't support requestDisableTouchEvent disable: " + disable);
             return;
         }
         ((NavigationFrameLayout) getView()).setTouchEnabled(!disable);

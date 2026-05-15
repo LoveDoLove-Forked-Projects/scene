@@ -1678,6 +1678,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
 
     @Override
     public void forceExecutePendingNavigationOperation() {
+        LoggerManager.getInstance().i(TAG, "forceExecutePendingNavigationOperation start");
         if (SceneGlobalConfig.cancelAnimationWhenForceExecutePendingNavigationOperation) {
             this.cancelCurrentRunningAnimation();
         }
@@ -1687,6 +1688,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
 
             }
         });
+        LoggerManager.getInstance().i(TAG, "forceExecutePendingNavigationOperation finish");
     }
 
     @Override

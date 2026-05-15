@@ -22,6 +22,7 @@ import com.bytedance.scene.Scene;
 import com.bytedance.scene.State;
 import com.bytedance.scene.animation.AnimationInfo;
 import com.bytedance.scene.animation.NavigationAnimationExecutor;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
 import com.bytedance.scene.navigation.Operation;
@@ -38,6 +39,7 @@ import java.util.List;
  * @author jiangqi@bytedance.com
  */
 public class PopDestroyOperation implements Operation {
+    private static final String TAG = "PopDestroyOperation";
     private final NavigationManagerAbility mManagerAbility;
     private final NavigationAnimationExecutor mAnimationFactory;
     private final NavigationScene mNavigationScene;
@@ -59,6 +61,7 @@ public class PopDestroyOperation implements Operation {
 
     @Override
     public void execute(final Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         //cache view before destroy it
         View currentSceneView = this.mCurrentScene.getView();
 

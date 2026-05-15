@@ -18,6 +18,7 @@ package com.bytedance.scene.navigation.push;
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.State;
 import com.bytedance.scene.interfaces.PushOptions;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
 import com.bytedance.scene.navigation.NavigationSceneManager;
@@ -29,6 +30,7 @@ import com.bytedance.scene.utlity.Predicate;
 import java.util.List;
 
 public class PushPauseOperation implements Operation {
+    private static final String TAG = "PushPauseOperation";
     private final NavigationManagerAbility mManagerAbility;
     private final PushOptions mPushOptions;
     private final boolean mIsPushSceneTranslucent;
@@ -43,6 +45,7 @@ public class PushPauseOperation implements Operation {
 
     @Override
     public void execute(Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         Predicate<Scene> removePredicate = mPushOptions.getRemovePredicate();
         if (removePredicate != null) {
             final List<Record> previousRecordList = mManagerAbility.getCurrentRecordList();

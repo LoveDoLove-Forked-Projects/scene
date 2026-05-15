@@ -18,6 +18,7 @@ package com.bytedance.scene.navigation.push;
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.animation.NavigationAnimationExecutor;
 import com.bytedance.scene.interfaces.PushOptions;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
 import com.bytedance.scene.navigation.Operation;
@@ -25,6 +26,7 @@ import com.bytedance.scene.navigation.Record;
 import com.bytedance.scene.navigation.SceneTranslucent;
 
 public class PushCreateOperation implements Operation {
+    private static final String TAG = "PushCreateOperation";
     private final NavigationManagerAbility mManagerAbility;
     private final Scene mScene;
     private final PushOptions mPushOptions;
@@ -41,6 +43,7 @@ public class PushCreateOperation implements Operation {
 
     @Override
     public void execute(Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         //add new scene to record list
         NavigationAnimationExecutor animationFactory = this.mPushOptions.getNavigationAnimationFactory();
         Record record = Record.newInstance(this.mScene, this.mIsSceneTranslucent, animationFactory);

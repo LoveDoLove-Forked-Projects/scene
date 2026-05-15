@@ -17,6 +17,7 @@ package com.bytedance.scene.navigation.pop;
 
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.interfaces.PopOptions;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.Operation;
 import com.bytedance.scene.navigation.Record;
@@ -31,6 +32,7 @@ import java.util.List;
  * @author jiangqi@bytedance.com
  */
 public class CoordinatePopOptionOperation implements Operation {
+    private static final String TAG = "CoordinatePopOptionOperation";
     private final NavigationManagerAbility mManagerAbility;
     private final NavigationMessageQueue mMessageQueue;
     private final PopOptions mPopOptions;
@@ -44,6 +46,7 @@ public class CoordinatePopOptionOperation implements Operation {
 
     @Override
     public void execute(Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         List<Record> recordList = mManagerAbility.getCurrentRecordList();
 
         Predicate<Scene> popUtilPredicate = this.mPopOptions.getPopUtilPredicate();

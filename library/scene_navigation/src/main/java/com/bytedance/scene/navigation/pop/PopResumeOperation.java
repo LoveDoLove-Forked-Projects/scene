@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.State;
 import com.bytedance.scene.interfaces.Function;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
 import com.bytedance.scene.navigation.NavigationSceneManager;
@@ -36,6 +37,7 @@ import java.util.List;
  * @author jiangqi@bytedance.com
  */
 public class PopResumeOperation implements Operation {
+    private static final String TAG = "PopResumeOperation";
     private final NavigationManagerAbility mManagerAbility;
     private final NavigationScene mNavigationScene;
     private final Record currentRecord;
@@ -53,6 +55,7 @@ public class PopResumeOperation implements Operation {
 
     @Override
     public void execute(Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         Scene dstScene = returnRecord.mScene;
         //When Scene has created View, compare its cached Configuration to the latest Configuration, if it is changed, recreate it
         boolean recreated = mManagerAbility.dispatchOnConfigurationChangedToRecord(returnRecord, dstScene);

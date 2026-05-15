@@ -78,6 +78,7 @@ public class CoordinatePushOptionOperation implements Operation {
 
     @Override
     public void execute(final Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         this.mManagerAbility.cancelCurrentRunningAnimation();
         if (!this.mManagerAbility.canExecuteNavigationStackOperation()) {
             throw new IllegalArgumentException("Can't push, current NavigationScene state " + mNavigationScene.getState().name);

@@ -16,6 +16,7 @@
 package com.bytedance.scene.navigation.push;
 
 import com.bytedance.scene.State;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
 import com.bytedance.scene.navigation.NavigationSceneManager;
@@ -25,6 +26,7 @@ import com.bytedance.scene.navigation.Record;
 import java.util.List;
 
 public class PushStopOperation implements Operation {
+    private static final String TAG = "PushStopOperation";
     private final NavigationManagerAbility mManagerAbility;
     private final NavigationScene mNavigationScene;
     private final Record mPreviousRecord;
@@ -37,6 +39,7 @@ public class PushStopOperation implements Operation {
 
     @Override
     public void execute(final Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         List<Record> currentRecordList = mManagerAbility.getCurrentRecordList();
         Record topRecord = currentRecordList.get(currentRecordList.size() - 1);
 

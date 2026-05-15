@@ -20,6 +20,7 @@ import android.os.Bundle;
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.SceneGlobalConfig;
 import com.bytedance.scene.State;
+import com.bytedance.scene.logger.LoggerManager;
 import com.bytedance.scene.navigation.NavigationManagerAbility;
 import com.bytedance.scene.navigation.NavigationScene;
 import com.bytedance.scene.navigation.Operation;
@@ -32,6 +33,7 @@ import com.bytedance.scene.utlity.SceneInternalException;
  * @author jiangqi@bytedance.com
  */
 public class PopPauseOperation implements Operation {
+    private static final String TAG = "PopPauseOperation";
     private final NavigationManagerAbility mManagerAbility;
     private final NavigationScene mNavigationScene;
     private final Scene mCurrentScene;
@@ -46,6 +48,7 @@ public class PopPauseOperation implements Operation {
 
     @Override
     public void execute(Runnable operationEndAction) {
+        LoggerManager.getInstance().i(TAG, "invoke execute operation");
         /*
          * The practice here should be to remove those Scenes in the middle,
          * then animate the two Scenes.
