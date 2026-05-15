@@ -16,16 +16,29 @@
 package com.bytedance.scene.utlity;
 
 import android.content.Context;
+import android.os.Build;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
+
+import com.bytedance.scene.SceneGlobalConfig;
 
 /**
  * Created by JiangQi on 8/19/18.
  */
 public class SoftInputUtility {
     public static boolean hideSoftInputFromWindow(View view) {
-        return view != null && ((InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(view.getWindowToken(), 0);
+        if (view == null) {
+            return false;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SceneGlobalConfig.useWindowInsetsToDetectIMEStatus) {
+            boolean isImeVisible = view.getRootView().getRootWindowInsets().isVisible(WindowInsets.Type.ime());
+            if (!isImeVisible) {
+                return false;
+            }
+        }
+        return ((InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public static boolean hideSoftInputFromWindow(Window window) {
