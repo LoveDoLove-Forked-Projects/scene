@@ -1165,7 +1165,7 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
                     ExceptionsUtility.invokeAndThrowExceptionToNextUILoop(new Runnable() {
                         @Override
                         public void run() {
-                            throw new SceneInternalException("Scene getViewModelStore() error, ViewModelStoreHolder type mismatch, request " + this.getClass().getName() + " but get " + previousSceneClass.getName());
+                            throw new SceneInternalException("Scene getViewModelStore() error, ViewModelStoreHolder type mismatch, request " + Scene.this.getClass().getName() + " but get " + previousSceneClass.getName());
                         }
                     });
                 }
