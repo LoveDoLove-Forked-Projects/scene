@@ -269,60 +269,6 @@ public abstract class Scene implements LifecycleOwner, SavedStateRegistryOwner, 
         this.mViewDestroyed = false;
     }
 
-    private static class FixSceneReuseLifecycleAdapter extends Lifecycle {
-        private final LifecycleRegistry lifecycleRegistry;
-        private final List<LifecycleObserver> lifecycleObservers = new ArrayList<>();
-
-        private FixSceneReuseLifecycleAdapter(LifecycleRegistry lifecycleRegistry) {
-            this.lifecycleRegistry = lifecycleRegistry;
-        }
-
-        @Override
-        public void addObserver(@NonNull LifecycleObserver observer) {
-            if (observer == null) {
-                return;
-            }
-
-            this.lifecycleObservers.add(observer);
-            this.lifecycleRegistry.addObserver(observer);
-        }
-
-        @Override
-        public void removeObserver(@NonNull LifecycleObserver observer) {
-            if (observer == null) {
-                return;
-            }
-            
-            this.lifecycleObservers.remove(observer);
-            this.lifecycleRegistry.removeObserver(observer);
-        }
-
-        @NonNull
-        @Override
-        public State getCurrentState() {
-            return this.lifecycleRegistry.getCurrentState();
-        }
-
-        void handleLifecycleEvent(@NonNull Lifecycle.Event event) {
-            this.lifecycleRegistry.handleLifecycleEvent(event);
-        }
-
-        int getObserverCount() {
-            return lifecycleObservers.size();
-        }
-
-        void rest() {
-            // Otherwise it will loop endless
-            for (LifecycleObserver lifecycleObserver : lifecycleObservers) {
-                this.lifecycleRegistry.removeObserver(lifecycleObserver);
-            }
-            this.lifecycleRegistry.markState(Lifecycle.State.INITIALIZED);
-            for (LifecycleObserver lifecycleObserver : lifecycleObservers) {
-                this.lifecycleRegistry.addObserver(lifecycleObserver);
-            }
-        }
-    }
-
     /** @hide */
     @RestrictTo(LIBRARY_GROUP)
     public void dispatchAttachScene(@Nullable Scene parentScene) {
