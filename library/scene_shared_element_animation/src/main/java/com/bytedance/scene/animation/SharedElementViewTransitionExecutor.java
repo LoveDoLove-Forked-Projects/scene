@@ -51,6 +51,9 @@ class SharedElementViewTransitionExecutor {
     private final SceneVisibilityTransition mOtherTransition;
     private int mAnimationDuration = ANIMATION_DURATION;
 
+    //as default, SharedElementViewTransitionExecutor will suppress scene view layout
+    private boolean mSuppressLayoutSceneView = true;
+
     /**
      * TODO: Support for excluding certain Views to do otherElementTransition
      */
@@ -171,7 +174,9 @@ class SharedElementViewTransitionExecutor {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-                SceneViewCompatUtils.suppressLayout((ViewGroup) toView.getRootView(), true);
+                if (mSuppressLayoutSceneView) {
+                    SceneViewCompatUtils.suppressLayout((ViewGroup) toView.getRootView(), true);
+                }
             }
 
             @Override
@@ -183,7 +188,9 @@ class SharedElementViewTransitionExecutor {
                     info.dstView.setVisibility(View.VISIBLE);
                     info.srcView.setVisibility(View.VISIBLE);
                 }
-                SceneViewCompatUtils.suppressLayout((ViewGroup) toView.getRootView(), false);
+                if (mSuppressLayoutSceneView) {
+                    SceneViewCompatUtils.suppressLayout((ViewGroup) toView.getRootView(), false);
+                }
                 endAction.run();
             }
         });
@@ -285,7 +292,9 @@ class SharedElementViewTransitionExecutor {
             @Override
             public void onAnimationStart(Animator animation) {
                 super.onAnimationStart(animation);
-                SceneViewCompatUtils.suppressLayout((ViewGroup) toView.getRootView(), true);
+                if (mSuppressLayoutSceneView) {
+                    SceneViewCompatUtils.suppressLayout((ViewGroup) toView.getRootView(), true);
+                }
             }
 
             @Override
@@ -297,7 +306,9 @@ class SharedElementViewTransitionExecutor {
                     info.dstView.setVisibility(View.VISIBLE);
                     info.srcView.setVisibility(View.VISIBLE);
                 }
-                SceneViewCompatUtils.suppressLayout((ViewGroup) toView.getRootView(), false);
+                if (mSuppressLayoutSceneView) {
+                    SceneViewCompatUtils.suppressLayout((ViewGroup) toView.getRootView(), false);
+                }
                 endAction.run();
             }
         });
@@ -309,5 +320,9 @@ class SharedElementViewTransitionExecutor {
                 valueAnimator.end();
             }
         });
+    }
+
+    void setSuppressLayoutSceneView(boolean suppressLayout) {
+        this.mSuppressLayoutSceneView = suppressLayout;
     }
 }

@@ -187,6 +187,7 @@ public class SharedElementSceneTransitionExecutor2 extends NavigationAnimationEx
         if (mAnimationDuration >= 0) {
             sharedElementViewTransitionExecutor.setAnimationDuration(mAnimationDuration);
         }
+        sharedElementViewTransitionExecutor.setSuppressLayoutSceneView(false);
         final Runnable fallbackAction = new Runnable() {
             @Override
             public void run() {
@@ -307,6 +308,7 @@ public class SharedElementSceneTransitionExecutor2 extends NavigationAnimationEx
         if (mAnimationDuration >= 0) {
             executor.setAnimationDuration(mAnimationDuration);
         }
+        executor.setSuppressLayoutSceneView(false);
         executor.executePopChange(fromView, toView, new Runnable() {
             @Override
             public void run() {
