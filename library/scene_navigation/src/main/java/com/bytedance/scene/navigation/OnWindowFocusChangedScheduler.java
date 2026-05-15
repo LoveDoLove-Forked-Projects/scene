@@ -35,7 +35,7 @@ import com.bytedance.scene.utlity.SceneInternalException;
  */
 @RestrictTo(LIBRARY)
 class OnWindowFocusChangedScheduler {
-    private static final String TAG = "NavigationFocusScheduler";
+    private static final String TAG = "OnWindowFocusChangedScheduler";
 
     //make sure Scene has invoked onCreateView, then dispatch onConfigurationChanged
     static boolean dispatchOnConfigurationChangedToRecordInternal(@NonNull Record record, @NonNull Scene scene, @NonNull Configuration newConfig, int configurationChangesAllowList, @NonNull Action1<Scene> recreateAction) {
