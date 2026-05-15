@@ -12,6 +12,7 @@ import androidx.core.util.Pair;
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.State;
 import com.bytedance.scene.interfaces.Function;
+import com.bytedance.scene.utlity.CancellationSignalManager;
 
 import java.util.List;
 
@@ -60,7 +61,7 @@ public interface NavigationManagerAbility {
 
     void restoreActivityStatusBarNavigationBarStatus(@Nullable ActivityStatusRecord activityStatusRecord);
 
-    NavigationSceneManager.CancellationSignalManager getCancellationSignalManager();
+    CancellationSignalManager getCancellationSignalManager();
 
     void notifySceneStateChanged();
 

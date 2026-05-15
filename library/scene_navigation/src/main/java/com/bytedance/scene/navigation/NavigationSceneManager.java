@@ -64,6 +64,7 @@ import com.bytedance.scene.navigation.reuse.IReuseScene;
 import com.bytedance.scene.utlity.Action1;
 import com.bytedance.scene.utlity.AnimatorUtility;
 import com.bytedance.scene.utlity.CancellationSignalList;
+import com.bytedance.scene.utlity.CancellationSignalManager;
 import com.bytedance.scene.utlity.NonNullPair;
 import com.bytedance.scene.utlity.Predicate;
 import com.bytedance.scene.utlity.SceneInstanceUtility;
@@ -1000,33 +1001,6 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
     public void cancelCurrentRunningAnimation() {
         mCancellationSignalManager.cancelAllRunningAnimationExecutor();
         InteractionNavigationPopAnimationFactory.cancelAllRunningInteractionAnimation();
-    }
-
-    public static class CancellationSignalManager {
-        private final List<CancellationSignalList> cancelableList = new ArrayList<>();
-
-        private void cancelAllRunningAnimationExecutor() {
-            if (cancelableList.size() == 0) {
-                return;
-            }
-
-            List<CancellationSignalList> copy = new ArrayList<>(cancelableList);
-            Iterator<CancellationSignalList> iterator = copy.iterator();
-            while (iterator.hasNext()) {
-                CancellationSignalList cancellationSignal = iterator.next();
-                iterator.remove();
-                cancellationSignal.cancel();
-            }
-            cancelableList.removeAll(copy);
-        }
-
-        public void add(CancellationSignalList cancellationSignalList) {
-            this.cancelableList.add(cancellationSignalList);
-        }
-
-        public void remove(CancellationSignalList cancellationSignalList) {
-            this.cancelableList.remove(cancellationSignalList);
-        }
     }
 
     /**
