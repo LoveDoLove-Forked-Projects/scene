@@ -10,6 +10,10 @@ android {
         minSdkVersion rootProject.ext.miniSdkVersion
     }
     resourcePrefix 'scene_'
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 
 dependencies {
