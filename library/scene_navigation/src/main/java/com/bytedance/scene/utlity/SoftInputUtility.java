@@ -33,9 +33,15 @@ public class SoftInputUtility {
             return false;
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SceneGlobalConfig.useWindowInsetsToDetectIMEStatus) {
-            boolean isImeVisible = view.getRootView().getRootWindowInsets().isVisible(WindowInsets.Type.ime());
-            if (!isImeVisible) {
-                return false;
+            View rootView = view.getRootView();
+            if (rootView != null) {
+                WindowInsets windowInsets = rootView.getRootWindowInsets();
+                if (windowInsets != null) {
+                    boolean isImeVisible = windowInsets.isVisible(WindowInsets.Type.ime());
+                    if (!isImeVisible) {
+                        return false;
+                    }
+                }
             }
         }
         return ((InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(view.getWindowToken(), 0);
