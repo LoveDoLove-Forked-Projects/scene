@@ -498,12 +498,12 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
     }
 
     @Override
-    public void recreate(@NonNull Scene scene) {
+    public void recreate(@NonNull Scene scene, int reason) {
         if (scene == null) {
             throw new NullPointerException("scene can't be null");
         }
         LoggerManager.getInstance().i(TAG, "recreate " + scene.toString());
-        scheduleToNextUIThreadLoop(new RecreateOperation(scene));
+        scheduleToNextUIThreadLoop(new RecreateOperation(scene, reason));
     }
 
     public void changeTranslucent(@NonNull final Scene scene, boolean translucent) {
@@ -1407,9 +1407,11 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
 
     private class RecreateOperation implements Operation {
         private final Scene scene;
+        private final int mReason;
 
-        private RecreateOperation(@NonNull Scene scene) {
+        private RecreateOperation(@NonNull Scene scene, int reason) {
             this.scene = scene;
+            this.mReason = reason;
         }
 
         @Override
@@ -1436,7 +1438,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
             LoggerManager.getInstance().i(TAG, "RecreateOperation current Scene save latest data, current Scene instance " + scene.toString());
 
             Bundle savedInstanceState = new Bundle();
-            savedInstanceState.putInt(SceneStateSaveReason.KEY_SCENE_SAVE_STATE_REASON, SceneStateSaveReason.CONFIGURATION_CHANGED);
+            savedInstanceState.putInt(SceneStateSaveReason.KEY_SCENE_SAVE_STATE_REASON, this.mReason);
             this.scene.dispatchSaveInstanceState(savedInstanceState);
 
             LoggerManager.getInstance().i(TAG, "RecreateOperation current Scene destroy itself, current Scene instance " + scene.toString());
@@ -1799,9 +1801,9 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
             @Override
             public void execute(Scene value) {
                 if (mNavigationScene.mNavigationSceneOptions.isRecreateSceneOnNextLoopAfterConfigurationChanged()) {
-                    recreate(value);
+                    recreate(value, SceneStateSaveReason.CONFIGURATION_CHANGED);
                 } else {
-                    executeOperationSafely(new RecreateOperation(value), null);
+                    executeOperationSafely(new RecreateOperation(value, SceneStateSaveReason.CONFIGURATION_CHANGED), null);
                 }
             }
         });
@@ -1843,7 +1845,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
         boolean result = dispatchOnConfigurationChangedToRecordInternal(record, scene, newConfig, mConfigurationChangesAllowList, new Action1<Scene>() {
             @Override
             public void execute(Scene value) {
-                executeOperationSafely(new RecreateOperation(value), null);
+                executeOperationSafely(new RecreateOperation(value, SceneStateSaveReason.CONFIGURATION_CHANGED), null);
             }
         });
         LoggerManager.getInstance().i(TAG, "PopOperation dispatch onConfigurationChanged finish");

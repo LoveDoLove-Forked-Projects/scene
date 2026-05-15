@@ -23,5 +23,39 @@ object SceneStateSaveReason {
      * such as a theme or orientation change.
      */
     const val CONFIGURATION_CHANGED = 3
+
+    /**
+     * The state is saved because NavigationScene.recreate() was explicitly called
+     * by user code, typically to force a fresh instance of the Scene.
+     */
+    const val MANUAL_RECREATE = 4
+
+    /**
+     * Returns a human-readable name for the given reason code.
+     */
+    fun getReasonName(reason: Int): String {
+        return when (reason) {
+            UNKNOWN -> "UNKNOWN"
+            PARENT_SAVED -> "PARENT_SAVED"
+            RECYCLING -> "RECYCLING"
+            CONFIGURATION_CHANGED -> "CONFIGURATION_CHANGED"
+            MANUAL_RECREATE -> "MANUAL_RECREATE"
+            else -> "INVALID($reason)"
+        }
+    }
+
+    /**
+     * Checks if the reason is a user-initiated reason.
+     */
+    fun isUserInitiated(reason: Int): Boolean {
+        return reason == MANUAL_RECREATE
+    }
+
+    /**
+     * Checks if the reason is related to system events.
+     */
+    fun isSystemEvent(reason: Int): Boolean {
+        return reason == PARENT_SAVED || reason == RECYCLING || reason == CONFIGURATION_CHANGED
+    }
 }
 

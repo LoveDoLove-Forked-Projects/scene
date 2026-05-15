@@ -59,7 +59,7 @@ public interface INavigationManager {
 
     public void push(@NonNull final Scene scene, @NonNull PushOptions pushOptions);
 
-    public void recreate(@NonNull Scene scene);
+    public void recreate(@NonNull Scene scene, int reason);
 
     public void changeTranslucent(@NonNull final Scene scene, boolean translucent);
 

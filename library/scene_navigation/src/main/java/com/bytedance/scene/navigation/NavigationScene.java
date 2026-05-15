@@ -51,6 +51,7 @@ import com.bytedance.scene.Scene;
 import com.bytedance.scene.SceneComponentFactory;
 import com.bytedance.scene.SceneGlobalConfig;
 import com.bytedance.scene.SceneParent;
+import com.bytedance.scene.SceneStateSaveReason;
 import com.bytedance.scene.State;
 import com.bytedance.scene.SuppressOperationAware;
 import com.bytedance.scene.animation.NavigationAnimationExecutor;
@@ -621,9 +622,13 @@ public final class NavigationScene extends Scene implements NavigationListener, 
     }
 
     /**
-     * @hide
+     * Cause this Scene to be recreated with a new instance.  This results
+     * in essentially the same flow as when the Scene is created due to
+     * a configuration change -- the current instance will go through its
+     * lifecycle to {@link #onDestroyView()} and a new instance then created after it.
+     * <p>
+     * also see {@link SceneStateSaveReason.MANUAL_RECREATE }
      */
-    @RestrictTo(LIBRARY_GROUP)
     public void recreate(@NonNull Scene scene) {
         ThreadUtility.checkUIThread();
 
@@ -650,7 +655,7 @@ public final class NavigationScene extends Scene implements NavigationListener, 
             throw new IllegalArgumentException("Scene " + scene.getClass().getName() + " must be a public class or public static class, " +
                     "and have only one parameterless constructor to be properly recreated.");
         }
-        mNavigationSceneManager.recreate(scene);
+        mNavigationSceneManager.recreate(scene, SceneStateSaveReason.MANUAL_RECREATE);
     }
 
     private void hideSoftInputIfNeeded() {

@@ -19,6 +19,7 @@ import androidx.lifecycle.OnLifecycleEvent;
 
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.SceneLifecycleManager;
+import com.bytedance.scene.SceneStateSaveReason;
 import com.bytedance.scene.Scope;
 import com.bytedance.scene.animation.animatorexecutor.NoAnimationExecutor;
 import com.bytedance.scene.group.GroupScene;
@@ -27,6 +28,7 @@ import com.bytedance.scene.navigation.NavigationSceneOptions;
 import com.bytedance.scene.navigation.NavigationSourceUtility;
 import com.bytedance.scene.utlity.ViewIdGenerator;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -67,6 +69,7 @@ public class RecreateSceneTests {
 
         //add restore enabled scene
         SupportSaveRestoreGroupScene topScene = new SupportSaveRestoreGroupScene();
+        SupportSaveRestoreGroupScene.checkReason = false;
         navigationScene.push(topScene);
 
         final boolean[] previousSceneLifecycleChanged = new boolean[1];
@@ -77,7 +80,9 @@ public class RecreateSceneTests {
             }
         });
 
+        SupportSaveRestoreGroupScene.checkReason = true;
         navigationScene.recreate(topScene);
+        SupportSaveRestoreGroupScene.checkReason = false;
 
         assertFalse(previousSceneLifecycleChanged[0]);
         assertNotSame(topScene, navigationScene.getCurrentScene());
@@ -122,6 +127,7 @@ public class RecreateSceneTests {
     }
 
     public static class SupportSaveRestoreGroupScene extends Scene {
+        public static boolean checkReason = false;
         public final int id = ViewIdGenerator.generateViewId();
 
         @NonNull
@@ -130,6 +136,14 @@ public class RecreateSceneTests {
             FrameLayout layout = new FrameLayout(requireSceneContext());
             layout.setId(id);
             return layout;
+        }
+
+        @Override
+        public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            if (checkReason) {
+                Assert.assertSame(SceneStateSaveReason.MANUAL_RECREATE, savedInstanceState.getInt(SceneStateSaveReason.KEY_SCENE_SAVE_STATE_REASON, 0));
+            }
         }
     }
 }
