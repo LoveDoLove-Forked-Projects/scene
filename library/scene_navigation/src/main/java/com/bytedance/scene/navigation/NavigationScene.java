@@ -176,6 +176,7 @@ public final class NavigationScene extends Scene implements NavigationListener, 
     private boolean mRestoreStateInLifecycle = false;
     private int mConfigurationChangesAllowList = 0;
     private boolean mIncreaseMessagePriority = false;
+    private boolean mNavigationAnimationRunning = false;
 
     @MainThread
     public void addNavigationListener(@NonNull final LifecycleOwner lifecycleOwner, @NonNull final NavigationListener listener) {
@@ -884,6 +885,18 @@ public final class NavigationScene extends Scene implements NavigationListener, 
         } else {
             return null;
         }
+    }
+
+    /**
+     * TODO support InteractionNavigationPopAnimationFactory
+     * @return true if any NavigationAnimationExecutor is running
+     */
+    public boolean isNavigationAnimationRunning() {
+        return this.mNavigationAnimationRunning;
+    }
+
+    void setNavigationAnimationRunning(boolean isAnimating){
+        this.mNavigationAnimationRunning = isAnimating;
     }
 
     /**

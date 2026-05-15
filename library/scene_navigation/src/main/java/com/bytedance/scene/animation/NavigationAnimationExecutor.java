@@ -25,6 +25,7 @@ import android.view.ViewTreeObserver;
 import com.bytedance.scene.Scene;
 import com.bytedance.scene.State;
 import com.bytedance.scene.navigation.NavigationScene;
+import com.bytedance.scene.navigation.NavigationScenePackageMethodKt;
 import com.bytedance.scene.utlity.Action1;
 import com.bytedance.scene.utlity.CancellationSignal;
 import com.bytedance.scene.utlity.CancellationSignalList;
@@ -101,6 +102,7 @@ public abstract class NavigationAnimationExecutor {
         }
 
         navigationScene.requestDisableTouchEvent(true);
+        NavigationScenePackageMethodKt.setNavigationAnimationRunningBridge(navigationScene, true);
         suppressRecycleAction.execute(true);
         final View fromView = fromInfo.mSceneView;
         final View toView = toInfo.mSceneView;
@@ -119,6 +121,7 @@ public abstract class NavigationAnimationExecutor {
             @Override
             public void run() {
                 navigationScene.requestDisableTouchEvent(false);
+                NavigationScenePackageMethodKt.setNavigationAnimationRunningBridge(navigationScene, false);
                 suppressRecycleAction.execute(false);
 
                 if (!mDisableRemoveView) {
@@ -209,11 +212,13 @@ public abstract class NavigationAnimationExecutor {
         }
 
         navigationScene.requestDisableTouchEvent(true);
+        NavigationScenePackageMethodKt.setNavigationAnimationRunningBridge(navigationScene, true);
         suppressRecycleAction.execute(true);
         final Runnable popEndAction = new Runnable() {
             @Override
             public void run() {
                 navigationScene.requestDisableTouchEvent(false);
+                NavigationScenePackageMethodKt.setNavigationAnimationRunningBridge(navigationScene, false);
                 suppressRecycleAction.execute(false);
                 endAction.run();
                 if (mCustomAnimationEndAction != null) {
