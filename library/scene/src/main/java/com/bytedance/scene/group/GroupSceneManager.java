@@ -825,7 +825,7 @@ class GroupSceneManager {
                                  boolean forceRemove,
                                  @Nullable Runnable endAction) {
         try {
-            moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+            moveStateWithSeparation(groupScene, this, scene, to, forceRemove, endAction);
         } catch (final Throwable throwable) {
             mLastException = throwable;
             mHandler.post(new Runnable() {
@@ -843,6 +843,7 @@ class GroupSceneManager {
      */
     private static void moveStateWithSeparation(
             @NonNull GroupScene groupScene,
+            @NonNull GroupSceneManager groupSceneManager,
             @NonNull Scene scene,
             @NonNull State to,
             boolean forceRemove,
@@ -863,36 +864,36 @@ class GroupSceneManager {
                 case NONE:
                     scene.dispatchAttachActivity(groupScene.requireActivity());
                     scene.dispatchAttachScene(groupScene);
-                    record = groupScene.getGroupSceneManager().findByScene(scene);
+                    record = groupSceneManager.findByScene(scene);
                     sceneBundle = record.bundle;
                     scene.dispatchCreate(sceneBundle);
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 case CREATED:
-                    record = groupScene.getGroupSceneManager().findByScene(scene);
+                    record = groupSceneManager.findByScene(scene);
                     sceneBundle = record.bundle;
-                    ViewGroup containerView = groupScene.findContainerById(groupScene.getGroupSceneManager().findSceneViewId(scene));
+                    ViewGroup containerView = groupScene.findContainerById(groupSceneManager.findSceneViewId(scene));
                     scene.dispatchCreateView(sceneBundle, containerView);
                     containerView.addView(scene.getView());
                     if (record.isHidden()) {
                         setSceneViewVisibility(scene, View.GONE);
                     }
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 case VIEW_CREATED:
-                    record = groupScene.getGroupSceneManager().findByScene(scene);
+                    record = groupSceneManager.findByScene(scene);
                     sceneBundle = record.bundle;
                     scene.dispatchActivityCreated(sceneBundle);
                     record.bundle = null;
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 case ACTIVITY_CREATED:
                     scene.dispatchStart();
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 case STARTED:
                     scene.dispatchResume();
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 default:
                     throw new SceneInternalException("unreachable state case " + currentState.getName());
@@ -901,11 +902,11 @@ class GroupSceneManager {
             switch (currentState) {
                 case RESUMED:
                     scene.dispatchPause();
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 case STARTED:
                     scene.dispatchStop();
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 case ACTIVITY_CREATED:
                     if (to == State.VIEW_CREATED) {
@@ -923,13 +924,13 @@ class GroupSceneManager {
                          */
                         Utility.removeFromParentView(view);
                     }
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 case CREATED:
                     scene.dispatchDestroy();
                     scene.dispatchDetachScene();
                     scene.dispatchDetachActivity();
-                    moveStateWithSeparation(groupScene, scene, to, forceRemove, endAction);
+                    moveStateWithSeparation(groupScene, groupSceneManager, scene, to, forceRemove, endAction);
                     break;
                 default:
                     throw new SceneInternalException("unreachable state case " + currentState.getName());
