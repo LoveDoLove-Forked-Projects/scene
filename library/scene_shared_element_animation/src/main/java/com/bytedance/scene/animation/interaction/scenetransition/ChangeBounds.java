@@ -19,6 +19,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.util.Property;
 import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -33,6 +34,16 @@ import com.bytedance.scene.animation.interaction.scenetransition.utils.SceneView
  */
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class ChangeBounds extends SceneTransition {
+    private final boolean suppressLayout;
+
+    public ChangeBounds(boolean suppressLayout) {
+        this.suppressLayout = suppressLayout;
+    }
+
+    public ChangeBounds() {
+        this(false);
+    }
+
     private static final Property<View, Rect> CENTER_BOUNDS = new Property<View, Rect>(Rect.class, "center_bounds") {
         @Override
         public void set(View object, final Rect value) {
@@ -80,5 +91,23 @@ public class ChangeBounds extends SceneTransition {
     @Override
     public void finish(boolean push) {
 
+    }
+
+    @Override
+    public void onStart(View animationView) {
+        super.onStart(animationView);
+        if (this.suppressLayout && animationView.getParent() instanceof ViewGroup) {
+            final ViewGroup parent = (ViewGroup) animationView.getParent();
+            SceneViewCompatUtils.suppressLayout(parent, true);
+        }
+    }
+
+    @Override
+    public void onFinish(View animationView) {
+        super.onFinish(animationView);
+        if (this.suppressLayout && animationView.getParent() instanceof ViewGroup) {
+            final ViewGroup parent = (ViewGroup) animationView.getParent();
+            SceneViewCompatUtils.suppressLayout(parent, false);
+        }
     }
 }
