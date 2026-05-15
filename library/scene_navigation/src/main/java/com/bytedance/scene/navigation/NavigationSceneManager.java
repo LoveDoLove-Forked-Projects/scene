@@ -1405,17 +1405,17 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
     }
 
     private class RecreateOperation implements Operation {
-        private final Scene scene;
+        private final Scene mScene;
         private final int mReason;
 
         private RecreateOperation(@NonNull Scene scene, int reason) {
-            this.scene = scene;
+            this.mScene = scene;
             this.mReason = reason;
         }
 
         @Override
         public void execute(Runnable operationEndAction) {
-            if (this.scene.getState() == State.NONE) {
+            if (this.mScene.getState() == State.NONE) {
                 //Target scene is destroyed, skip
                 if (operationEndAction != null) {
                     operationEndAction.run();
@@ -1423,28 +1423,28 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
                 return;
             }
 
-            if (!scene.isSceneRestoreEnabled()) {
-                throw new IllegalArgumentException("Scene " + scene.getClass().getName() + " don't support restore, so it can't use recreate");
+            if (!mScene.isSceneRestoreEnabled()) {
+                throw new IllegalArgumentException("Scene " + mScene.getClass().getName() + " don't support restore, so it can't use recreate");
             }
-            if (!SceneInstanceUtility.isConstructorMethodSupportRestore(scene)) {
-                throw new IllegalArgumentException("Scene " + scene.getClass().getName() + " must be a public class or public static class, " +
+            if (!SceneInstanceUtility.isConstructorMethodSupportRestore(mScene)) {
+                throw new IllegalArgumentException("Scene " + mScene.getClass().getName() + " must be a public class or public static class, " +
                         "and have only one parameterless constructor to be properly recreated.");
             }
 
-            Record record = mBackStackList.getRecordByScene(this.scene);
-            State targetState = this.scene.getState();
+            Record record = mBackStackList.getRecordByScene(this.mScene);
+            State targetState = this.mScene.getState();
 
-            LoggerManager.getInstance().i(TAG, "RecreateOperation current Scene save latest data, current Scene instance " + scene.toString());
+            LoggerManager.getInstance().i(TAG, "RecreateOperation current Scene save latest data, current Scene instance " + mScene.toString());
 
             Bundle savedInstanceState = new Bundle();
             savedInstanceState.putInt(SceneStateSaveReason.KEY_SCENE_SAVE_STATE_REASON, this.mReason);
-            this.scene.dispatchSaveInstanceState(savedInstanceState);
+            this.mScene.dispatchSaveInstanceState(savedInstanceState);
 
-            LoggerManager.getInstance().i(TAG, "RecreateOperation current Scene destroy itself, current Scene instance " + scene.toString());
-            moveState(mNavigationScene, this.scene, State.NONE, null, false, null);
+            LoggerManager.getInstance().i(TAG, "RecreateOperation current Scene destroy itself, current Scene instance " + mScene.toString());
+            moveState(mNavigationScene, this.mScene, State.NONE, null, false, null);
 
             Scene newSceneInstance = null;
-            if (mBackStackList.isRootScene(this.scene) && mNavigationScene.mRootSceneComponentFactory != null) {
+            if (mBackStackList.isRootScene(this.mScene) && mNavigationScene.mRootSceneComponentFactory != null) {
                 Scene sceneInstance = mNavigationScene.mRootSceneComponentFactory.instantiateScene(mNavigationScene.requireActivity().getClassLoader(), record.mSceneClassName, null);
                 if (sceneInstance != null && sceneInstance.getParentScene() != null) {
                     throw new IllegalArgumentException("SceneComponentFactory instantiateScene return Scene already has a parent");
@@ -1456,7 +1456,7 @@ public class NavigationSceneManager implements INavigationManager, NavigationMan
             }
             if (newSceneInstance == null) {
                 LoggerManager.getInstance().i(TAG, "RecreateOperation create new Scene directly");
-                Class<?> sceneClass = scene.getClass();
+                Class<?> sceneClass = mScene.getClass();
                 newSceneInstance = SceneInstanceUtility.getInstanceFromClass(sceneClass, null);
             }
             record.mScene = newSceneInstance;
