@@ -37,7 +37,7 @@ import java.util.Map;
  * Created by JiangQi on 9/2/18.
  */
 @Deprecated
-public class LegacySharedElementSceneTransitionExecutor extends NavigationAnimationExecutor {
+public class SharedElementSceneTransitionExecutor extends NavigationAnimationExecutor {
     private static final String TAG = "LegacySharedElementSceneTransitionExecutor";
     @NonNull
     private final Map<String, SceneTransition> mSharedElementTransition;
@@ -52,7 +52,7 @@ public class LegacySharedElementSceneTransitionExecutor extends NavigationAnimat
     protected int mAnimationDuration = -1;
     private final boolean mUseFallbackIfTranslucent;
 
-    public LegacySharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
+    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
                                                 @Nullable SceneVisibilityTransition otherTransition,
                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor,
                                                 @NonNull SharedElementNotFoundPolicy sharedElementNotFoundPolicy,
@@ -64,20 +64,20 @@ public class LegacySharedElementSceneTransitionExecutor extends NavigationAnimat
         this.mUseFallbackIfTranslucent = useFallbackIfTranslucent;
     }
 
-    public LegacySharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
+    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
                                                 @Nullable SceneVisibilityTransition otherTransition,
                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor,
                                                 @NonNull SharedElementNotFoundPolicy sharedElementNotFoundPolicy) {
         this(sharedElementTransition, otherTransition, fallbackAnimationExecutor, sharedElementNotFoundPolicy, false);
     }
 
-    public LegacySharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
+    public SharedElementSceneTransitionExecutor(@NonNull Map<String, SceneTransition> sharedElementTransition,
                                                 @Nullable SceneVisibilityTransition otherTransition,
                                                 @NonNull NavigationAnimationExecutor fallbackAnimationExecutor) {
         this(sharedElementTransition, otherTransition, fallbackAnimationExecutor, SharedElementNotFoundPolicy.FALLBACK);
     }
 
-    public LegacySharedElementSceneTransitionExecutor(Map<String, SceneTransition> sharedElementTransition, SceneVisibilityTransition otherTransition) {
+    public SharedElementSceneTransitionExecutor(Map<String, SceneTransition> sharedElementTransition, SceneVisibilityTransition otherTransition) {
         this(sharedElementTransition, otherTransition, new Android8DefaultSceneAnimatorExecutor());
     }
 
