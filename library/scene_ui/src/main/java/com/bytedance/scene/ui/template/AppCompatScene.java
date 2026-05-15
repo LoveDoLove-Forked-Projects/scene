@@ -16,12 +16,29 @@
 package com.bytedance.scene.ui.template;
 
 
+import com.bytedance.scene.Scene;
+import com.bytedance.scene.navigation.NavigationScene;
+
 /**
  * Created by JiangQi on 8/24/18.
  */
 public abstract class AppCompatScene extends SwipeBackAppCompatScene {
+    private boolean mFinished;
+
     public AppCompatScene() {
         setSwipeEnabled(false);
+    }
+
+    public void finish() {
+        Scene parentScene = getParentScene();
+        if (parentScene instanceof NavigationScene) {
+            this.mFinished = true;
+            ((NavigationScene) parentScene).remove(this);
+        }
+    }
+
+    public boolean isFinishing() {
+        return mFinished;
     }
 }
 
